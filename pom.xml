@@ -1,0 +1,97 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>cn.ctyun</groupId>
+	<artifactId>UIDSS</artifactId>
+	<version>0.30</version>
+	<description>User ID Server </description>
+	<inceptionYear>2016</inceptionYear>
+
+	<!-- <repositories> -->
+	<!-- <repository> -->
+	<!-- <id>Twitter Maven Repo</id> -->
+	<!-- <url>http://maven.twttr.com</url> -->
+	<!-- </repository> -->
+	<!-- </repositories> -->
+
+	<dependencies>
+		<dependency> <!-- Spark dependency -->
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_2.10</artifactId>
+			<version>1.4.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-graphx_2.10</artifactId>
+			<version>1.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+			<version>2.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>jdk.tools</groupId>
+			<artifactId>jdk.tools</artifactId>
+			<version>1.7</version>
+			<scope>system</scope>
+			<systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-client</artifactId>
+			<version>0.98.11-hadoop2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-common</artifactId>
+			<version>0.98.11-hadoop2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-server</artifactId>
+			<version>0.98.11-hadoop2</version>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>com.hadoop.gplcompression</groupId> -->
+		<!-- <artifactId>hadoop-lzo</artifactId> -->
+		<!-- <version>0.4.19</version> -->
+		<!-- </dependency> -->
+
+	</dependencies>
+	<properties>
+		<java.version>1.7</java.version>
+	</properties>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.6</version>
+					<configuration>
+						<!-- Specifies the configuration file of the assembly plugin -->
+						<descriptors>
+							<!--<descriptor>src/assembly/package.xml</descriptor> -->
+						</descriptors>
+						<descriptorRefs>
+							<descriptorRef>jar-with-dependencies</descriptorRef>
+						</descriptorRefs>
+					</configuration>
+					<executions>
+						<execution>
+							<id>make-assembly</id>
+							<phase>package</phase>
+							<goals>
+								<goal>single</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>
