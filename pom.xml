@@ -61,6 +61,27 @@
 		<!-- <artifactId>hadoop-lzo</artifactId> -->
 		<!-- <version>0.4.19</version> -->
 		<!-- </dependency> -->
+		<dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-swing</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+
 
 	</dependencies>
 	<properties>
@@ -69,6 +90,25 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+			    <plugin>
+                     <groupId>org.scala-tools</groupId>
+                     <artifactId>maven-scala-plugin</artifactId>
+                     <executions>
+                       <execution>
+                         <goals>
+                          <goal>compile</goal>
+                          <goal>testCompile</goal>
+                         </goals>
+                      </execution>
+                     </executions>
+                     <configuration>
+                        <sourceDir>src/main/scala/java</sourceDir>
+                           <jvmArgs>
+                            <jvmArg>-Xms64m</jvmArg>
+                            <jvmArg>-Xmx1024m</jvmArg>
+                           </jvmArgs>
+                    </configuration>
+                </plugin>
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<version>2.6</version>
