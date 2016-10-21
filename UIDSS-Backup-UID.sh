@@ -1,4 +1,4 @@
-#!/bin/bash
+ï»¿#!/bin/bash
 
 #
 #arg(1) current month, for ex. "201609" .
@@ -9,7 +9,7 @@ logPath=/data11/dacp/mt001/UIDSS/logs/
 
 cur_month=$1
 
-#´´½¨µ±ÔÂµÄ¿ìÕÕ
+#åˆ›å»ºå½“æœˆçš„å¿«ç…§
 snapshot 'dev_yx:UID_GRAPH', 'UID_GRAPH_SNAP_"${cur_month}"'
-#´´½¨µ±ÔÂµÄ¹ØÏµ±í¿ËÂ¡±í
+#åˆ›å»ºå½“æœˆçš„å…³ç³»è¡¨å…‹éš†è¡¨
 clone_snapshot'UID_GRAPH_SNAP_"${cur_month}"' , ' dev_yx:UID_GRAPH_"${cur_month}"'
