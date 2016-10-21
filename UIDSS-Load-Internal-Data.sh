@@ -1,4 +1,4 @@
-#!/bin/bash
+ï»¿#!/bin/bash
 
 #
 #arg(1) current month, for ex. "201609" .
@@ -17,25 +17,22 @@ array_province=(85133)
 
 for i in "${!array_province[@]}"
 do
-        if [ "${pre_month}" = "" ] ; then
-                #È«Á¿¼ÓÔØ
-                #ÄÚ²¿ÒÆ¶¯ÓÃ»§Êı¾İ
-                spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL ${mbl_dir}${array_province[i]}/${cur_month} 0 
-                #ÄÚ²¿¹ÌÍøÓÃ»§Êı¾İ
-								spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${tel_dir}${array_province[i]}/${cur_month} 0 
-								#ÄÚ²¿¿í´øÓÃ»§Êı¾İ
-								spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${wb_dir}${array_province[i]}/${cur_month} 0 
-                
-        else
-                #ÔöÁ¿¼ÓÔØ
-                #ÄÚ²¿ÒÆ¶¯ÓÃ»§Êı¾İ
-                spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL ${mbl_dir}${array_province[i]}/${cur_month} ${mbl_dir}${array_province[i]}/${pre_month} 
-                #ÄÚ²¿¹ÌÍøÓÃ»§Êı¾İ
-								spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-x.xx-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${tel_dir}${array_province[i]}/${cur_month} ${mbl_dir}${array_province[i]}/${pre_month}
-								#¼ÓÔØÄÚ²¿¿í´øÓÃ»§Êı¾İ
-								spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-x.xx-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${wb_dir}${array_province[i]}/${cur_month} ${mbl_dir}${array_province[i]}/${pre_month}
-        fi
-
-        printf "Internal data ${array_province[i]}/${cur_month} is loaded\n"
-        
+  if [ "${pre_month}" = "" ] ; then
+    #å…¨é‡åŠ è½½
+    #å†…éƒ¨ç§»åŠ¨ç”¨æˆ·æ•°æ®
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL ${mbl_dir}${array_province[i]}/${cur_month} 0 &
+    #å†…éƒ¨å›ºç½‘ç”¨æˆ·æ•°æ®
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${tel_dir}${array_province[i]}/${cur_month} 0 &
+    #å†…éƒ¨å®½å¸¦ç”¨æˆ·æ•°æ®
+		spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${wb_dir}${array_province[i]}/${cur_month} 0 &
+  else
+    #å¢é‡åŠ è½½
+    #å†…éƒ¨ç§»åŠ¨ç”¨æˆ·æ•°æ®
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL ${mbl_dir}${array_province[i]}/${cur_month} ${mbl_dir}${array_province[i]}/${pre_month} &
+    #å†…éƒ¨å›ºç½‘ç”¨æˆ·æ•°æ®
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-x.xx-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${tel_dir}${array_province[i]}/${cur_month} ${mbl_dir}${array_province[i]}/${pre_month} &
+    #åŠ è½½å†…éƒ¨å®½å¸¦ç”¨æˆ·æ•°æ®
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-x.xx-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${wb_dir}${array_province[i]}/${cur_month} ${mbl_dir}${array_province[i]}/${pre_month} &
+  fi
+  printf "Internal data ${array_province[i]}/${cur_month} is loaded\n"
 done
