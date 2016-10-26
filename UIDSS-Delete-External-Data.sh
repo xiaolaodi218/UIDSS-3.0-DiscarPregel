@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 #arg(1) obsolete date, for ex. "20161001000000" .
 

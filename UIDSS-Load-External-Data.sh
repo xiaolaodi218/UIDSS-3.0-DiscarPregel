@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 baseDirForScriptSelf=$(cd "$(dirname "$0")"; pwd)
 logPath=/data11/dacp/mt001/UIDSS/logs/
@@ -14,9 +14,9 @@ array_province=(sichuan)
 
 for i in "${!array_province[@]}"
 do
-  #加载外部移动用户数据
+  #Load external mobile user data
   spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g     --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData DPI_INFO_MBL     /daas/subtl/st001/label_asiainfo/${array_province[i]}/${mbl_dir}/${cur_month}/    0   &
-  #加载外部固网用户数据
+  #Load external wide-band user data
   spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5     --executor-memory 10g     --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData DPI_INFO_WB     /daas/subtl/st001/label_asiainfo/${array_province[i]}/${wb_dir}/${cur_month}/    0   &
   printf "External data ${array_province[i]}/${cur_month} is loaded\n"
 done

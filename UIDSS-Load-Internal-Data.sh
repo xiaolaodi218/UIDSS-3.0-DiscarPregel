@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 #
 #arg(1) current month, for ex. "201609" .
@@ -25,21 +25,21 @@ array_province=(85133)
 for i in "${!array_province[@]}"
 do
   if [ "${pre_month}" = "0" ] ; then
-    #全量加载
-    #内部移动用户数据
+    #Full dataset load
+    #Internal mobile user data
     spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL ${mbl_dir}${array_province[i]}/${cur_month}/ 0 &
-    #内部固网用户数据
+    #Internal fix-line user data
     spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${tel_dir}${array_province[i]}/${cur_month}/ 0 &
-    #内部宽带用户数据
+    #Internal wide-band user data
 		spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${wb_dir}${array_province[i]}/${cur_month}/ 0 &
   else
-    #增量加载
-    #内部移动用户数据
+    #Incremental data load
+    #Internal mobile user data
     spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL ${mbl_dir}${array_province[i]}/${cur_month}/ ${mbl_dir}${array_province[i]}/${pre_month}/ &
-    #内部固网用户数据
-    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-x.xx-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${tel_dir}${array_province[i]}/${cur_month}/ ${mbl_dir}${array_province[i]}/${pre_month}/ &
-    #加载内部宽带用户数据
-    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-x.xx-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${wb_dir}${array_province[i]}/${cur_month}/ ${mbl_dir}${array_province[i]}/${pre_month}/ &
+    #Internal fix-line user data
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${tel_dir}${array_province[i]}/${cur_month}/ ${mbl_dir}${array_province[i]}/${pre_month}/ &
+    #Internal wide-band user data
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${wb_dir}${array_province[i]}/${cur_month}/ ${mbl_dir}${array_province[i]}/${pre_month}/ &
   fi
   printf "Internal data ${array_province[i]}/${cur_month}/ is loaded\n"
 done
