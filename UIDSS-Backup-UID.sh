@@ -8,6 +8,10 @@ baseDirForScriptSelf=$(cd "$(dirname "$0")"; pwd)
 logPath=/data11/dacp/mt001/UIDSS/logs/
 
 cur_month=$1
+if [ "${cur_month}" = "" ] ; then
+	cur_month=$(date -d last-month "+%Y%m")
+fi
+
 
 #创建当月的快照
 snapshot 'dev_yx:UID_GRAPH', 'UID_GRAPH_SNAP_"${cur_month}"'

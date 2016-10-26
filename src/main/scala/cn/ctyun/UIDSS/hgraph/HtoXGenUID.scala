@@ -49,7 +49,36 @@ import org.apache.spark.SparkContext
  * 保存到数据库
  */
 object HtoXGenUID extends Logging {
-
+  private var printCount = 1
+  def getPrintCount() = {
+    if (printCount > 0) {
+      printCount = printCount - 1
+      1
+    } else {
+      0
+    }
+  }
+  
+  private var printCount_1 = 1
+  def getPrintCount_1() = {
+    if (printCount_1 > 0) {
+      printCount_1 = printCount_1 - 1
+      1
+    } else {
+      0
+    }
+  }
+  
+  private var printCount_2 = 1
+  def getPrintCount_2() = {
+    if (printCount_2 > 0) {
+      printCount_2 = printCount_2 - 1
+      1
+    } else {
+      0
+    }
+  }
+  
   var rddVidtoLinks: RDD[(Long, (String, String))] = null
 
   def isDebugVert(vert: String): Boolean = {
@@ -182,9 +211,14 @@ object HtoXGenUID extends Logging {
     //点id到点序号对应关系
     //（点id，(点序号,"sn")） 
     // 比如： （AI430851876，（100100001,"AI"））
-    val rddIdtoVId = rddHBaseWithSN.map[(String, (Long, String))] {
+    //val rddIdtoVId = rddHBaseWithSN.map[(String, (Long, String))] {
+    val rddIdtoVId = rddHBaseWithSN.map {
       case (sn, v) =>
         val id = Bytes.toString(v.getRow)
+        if (HtoXGenUID.getPrintCount() > 0) {
+          println("**************************id is " + id +"\n")
+          println("**************************sn is " + sn +"\n")
+        }
         //if (isDebugVert(id)) {  println(id + "  is assigned sn of " + sn) }
         (id, (sn, id.substring(0, 2)))
     }
@@ -239,8 +273,13 @@ object HtoXGenUID extends Logging {
     //边集合第1步 - 点到点关系，同时替换起点序号
     //(终止点id, (起始点序号，边属性）)
     //比如：(AI430851876, (100100001，"$1"))
-    val rddDstIdSrcVId = rddHBaseWithSN.flatMap[(String, (Long, String))] {
+    //val rddDstIdSrcVId = rddHBaseWithSN.flatMap[(String, (Long, String))] {
+    val rddDstIdSrcVId = rddHBaseWithSN.flatMap {  
       case (sn, v) =>
+        if (HtoXGenUID.getPrintCount_1() > 0) {
+          println("**************************sn is " + sn +"\n")
+          println("**************************v is " + v +"\n")
+        }
         mapToEdges(sn, v)
     }
     //rddVtoV.foreach {

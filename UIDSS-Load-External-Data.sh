@@ -3,7 +3,10 @@
 baseDirForScriptSelf=$(cd "$(dirname "$0")"; pwd)
 logPath=/data11/dacp/mt001/UIDSS/logs/
 
-cur_month=$(date -d last-month "+%Y%m")
+cur_month=$1
+if [ "${cur_month}" = "" ] ; then
+	cur_month=$(date -d last-month "+%Y%m")
+fi
 
 mbl_dir=present_quick_mobile
 wb_dir=present_quick_fix_accntMD5

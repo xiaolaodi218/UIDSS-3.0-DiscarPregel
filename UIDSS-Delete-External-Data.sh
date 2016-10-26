@@ -3,6 +3,9 @@
 #arg(1) obsolete date, for ex. "20161001000000" .
 
 obsolete_date=$1
+if [ "${obsolete_date}" = "" ] ; then
+	obsolete_date=$(date -d '-3 months' "+%Y%m%d%H%M%S")
+fi
 
 baseDirForScriptSelf=$(cd "$(dirname "$0")"; pwd)
 logPath=/data11/dacp/mt001/UIDSS/logs/
