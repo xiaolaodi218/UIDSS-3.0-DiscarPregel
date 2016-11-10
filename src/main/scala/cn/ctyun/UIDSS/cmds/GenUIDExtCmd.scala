@@ -97,9 +97,9 @@ object GenUIDExtCmd extends Logging {
     val partitionNum = props.getProperty("rddPartitions").toInt
     val rdd = rddHBaseWithSN.repartition(partitionNum)
     rddHbase.unpersist(true)
-    val cnt= rdd.count().toString() 
-    info(" ******  Read " + cnt + " rows from HBase ******")
-    println(" ******  Read " + cnt + " rows from HBase ******")
+    //val cnt= rdd.count().toString() 
+    //info(" ******  Read " + cnt + " rows from HBase ******")
+    //println(" ******  Read " + cnt + " rows from HBase ******")
 
     /******** 二、生成图 *******/
 
