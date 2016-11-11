@@ -43,7 +43,9 @@ object HBaseIO extends Logging {
     //set zookeeper port
     hconf.set("hbase.zookeeper.property.clientPort", props.getProperty("hbaseZkPort"));
     hconf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-
+    hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"));
+    hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number")); 
+    
     hconf.addResource("./resources/core-site.xml")
     hconf.addResource("./resources/hbase-site.xml")
     hconf.addResource("./resources/hdfs-site.xml")
@@ -89,7 +91,9 @@ object HBaseIO extends Logging {
         //set zookeeper port
         hconf.set("hbase.zookeeper.property.clientPort", props.getProperty("hbaseZkPort"));
         hconf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-
+        hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"));
+        hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number")); 
+    
         hconf.addResource("./resources/core-site.xml")
         hconf.addResource("./resources/hbase-site.xml")
         hconf.addResource("./resources/hdfs-site.xml")
