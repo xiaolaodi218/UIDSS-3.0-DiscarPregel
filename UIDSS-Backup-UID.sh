@@ -5,7 +5,6 @@
 #
 
 baseDirForScriptSelf=$(cd "$(dirname "$0")"; pwd)
-logPath=/data11/dacp/mt001/UIDSS/logs/
 
 cur_month=$1
 if [ "${cur_month}" = "" ] ; then

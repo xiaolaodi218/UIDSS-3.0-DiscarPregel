@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function __readINI() {
+ INIFILE=$1; SECTION=$2; ITEM=$3
+ _readIni=`awk -F '=' '/\['$SECTION'\]/{a=1}a==1&&$1~/'$ITEM'/{print $2;exit}' $INIFILE`
+echo ${_readIni}
+}
+
 #arg(1) obsolete date, for ex. "20161001000000" .
 
 obsolete_date=$1
@@ -8,7 +14,8 @@ if [ "${obsolete_date}" = "" ] ; then
 fi
 
 baseDirForScriptSelf=$(cd "$(dirname "$0")"; pwd)
-logPath=/data11/dacp/mt001/UIDSS/logs/
 cd ${baseDirForScriptSelf}
 
-spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --executor-memory 30g  --num-executors 5  --executor-cores 1  --queue qyx1  UIDSS-0.30-jar-with-dependencies.jar Y_DeleteOldData ${obsolete_date}  & 
+yarn_queue=$(__readINI UIDSS-Shell.ini DeleteExternal yarn_queue)
+
+spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --executor-memory 30g  --num-executors 5  --executor-cores 1  --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar Y_DeleteOldData ${obsolete_date}  & 
