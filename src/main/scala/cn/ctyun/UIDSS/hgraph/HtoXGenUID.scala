@@ -107,7 +107,7 @@ object HtoXGenUID extends Logging {
       case HGraphUtil.STR_ACCS_NUM => { if (iNeighbors > 20) bNeedProcess = false }
       // UID 最多拥有200个号        
       case HGraphUtil.STR_UD       => { if (iNeighbors > 200) bNeedProcess = false }
-      case _    => { if (iNeighbors > 5) bNeedProcess = false }
+      case _    => { bNeedProcess = false }
     }
     bNeedProcess
   }
