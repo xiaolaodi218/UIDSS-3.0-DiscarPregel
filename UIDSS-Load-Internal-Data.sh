@@ -29,25 +29,38 @@ wb_dir=$(__readINI UIDSS-Shell.ini LoadInternal wb_dir)
 tel_dir=$(__readINI UIDSS-Shell.ini LoadInternal tel_dir)
 array_province=($(__readINI UIDSS-Shell.ini LoadInternal province))
 yarn_queue=$(__readINI UIDSS-Shell.ini LoadInternal yarn_queue)
+driver_memory_UID_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadInternal driver_memory_UID_INFO_MBL)
+num_executors_UID_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadInternal num_executors_UID_INFO_MBL)
+executor_memory_UID_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadInternal executor_memory_UID_INFO_MBL)
+executor_cores_UID_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadInternal executor_cores_UID_INFO_MBL)
+driver_memory_UID_INFO_TEL=$(__readINI UIDSS-Shell.ini LoadInternal driver_memory_UID_INFO_TEL)
+num_executors_UID_INFO_TEL=$(__readINI UIDSS-Shell.ini LoadInternal num_executors_UID_INFO_TEL)
+executor_memory_UID_INFO_TEL=$(__readINI UIDSS-Shell.ini LoadInternal executor_memory_UID_INFO_TEL)
+executor_cores_UID_INFO_TEL=$(__readINI UIDSS-Shell.ini LoadInternal executor_cores_UID_INFO_TEL)
+driver_memory_UID_INFO_WB=$(__readINI UIDSS-Shell.ini LoadInternal driver_memory_UID_INFO_WB)
+num_executors_UID_INFO_WB=$(__readINI UIDSS-Shell.ini LoadInternal num_executors_UID_INFO_WB)
+executor_memory_UID_INFO_WB=$(__readINI UIDSS-Shell.ini LoadInternal executor_memory_UID_INFO_WB)
+executor_cores_UID_INFO_WB=$(__readINI UIDSS-Shell.ini LoadInternal executor_cores_UID_INFO_WB)
+
 
 for i in "${!array_province[@]}"
 do
   if [ "${pre_month}" = "0" ] ; then
     #Full dataset load
     #Internal mobile user data
-    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL ${hdfs_base_dir}/${mbl_dir}/${array_province[i]}/${cur_month}/ 0 &
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory ${driver_memory_UID_INFO_MBL}  --num-executors ${num_executors_UID_INFO_MBL}    --executor-memory  ${executor_memory_UID_INFO_MBL}  --executor-cores  ${executor_cores_UID_INFO_MBL}  --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_MBL   ${hdfs_base_dir}/${mbl_dir}/${array_province[i]}/${cur_month}/ 0 &
     #Internal fix-line user data
-    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL   ${hdfs_base_dir}/${tel_dir}/${array_province[i]}/${cur_month}/ 0 &
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory ${driver_memory_UID_INFO_TEL}  --num-executors ${num_executors_UID_INFO_TEL}    --executor-memory  ${executor_memory_UID_INFO_TEL}  --executor-cores  ${executor_cores_UID_INFO_TEL}  --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL   ${hdfs_base_dir}/${tel_dir}/${array_province[i]}/${cur_month}/ 0 &
     #Internal wide-band user data
-		spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB   ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${cur_month}/ 0 &
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory ${driver_memory_UID_INFO_WB}  --num-executors ${num_executors_UID_INFO_WB}    --executor-memory  ${executor_memory_UID_INFO_WB}     --executor-cores  ${executor_cores_UID_INFO_WB}    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB   ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${cur_month}/ 0 &
   else
     #Incremental data load
     #Internal mobile user data
-    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory 10g  --num-executors 5    --executor-memory 10g  --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL  ${hdfs_base_dir}/${mbl_dir}/${array_province[i]}/${cur_month}/ ${hdfs_base_dir}/${mbl_dir}/${array_province[i]}/${pre_month}/ &
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory ${driver_memory_UID_INFO_MBL}  --num-executors ${num_executors_UID_INFO_MBL}   --executor-memory  ${executor_memory_UID_INFO_MBL}   --executor-cores  ${executor_cores_UID_INFO_MBL}  --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar Y_LoadRawData UID_INFO_MBL  ${hdfs_base_dir}/${mbl_dir}/${array_province[i]}/${cur_month}/ ${hdfs_base_dir}/${mbl_dir}/${array_province[i]}/${pre_month}/ &
     #Internal fix-line user data
-    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${hdfs_base_dir}/${tel_dir}/${array_province[i]}/${cur_month}/ ${hdfs_base_dir}/${tel_dir}/${array_province[i]}/${pre_month}/ &
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory ${driver_memory_UID_INFO_TEL}  --num-executors  ${num_executors_UID_INFO_TEL}   --executor-memory  ${executor_memory_UID_INFO_TEL}   --executor-cores  ${executor_cores_UID_INFO_TEL}  --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_TEL    ${hdfs_base_dir}/${tel_dir}/${array_province[i]}/${cur_month}/ ${hdfs_base_dir}/${tel_dir}/${array_province[i]}/${pre_month}/ &
     #Internal wide-band user data
-    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g      --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${cur_month}/ ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${pre_month}/ &
+    spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory ${driver_memory_UID_INFO_WB}  --num-executors  ${num_executors_UID_INFO_WB}    --executor-memory  ${executor_memory_UID_INFO_WB}    --executor-cores  ${executor_cores_UID_INFO_WB}   --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${cur_month}/ ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${pre_month}/ &
   fi
   printf "Internal data ${array_province[i]}/${cur_month}/ is loaded\n"
 done

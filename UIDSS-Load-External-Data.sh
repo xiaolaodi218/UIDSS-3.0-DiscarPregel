@@ -19,12 +19,20 @@ mbl_dir=$(__readINI UIDSS-Shell.ini LoadExternal mbl_dir)
 wb_dir=$(__readINI UIDSS-Shell.ini LoadExternal wb_dir)
 array_province=($(__readINI UIDSS-Shell.ini LoadExternal province))
 yarn_queue=$(__readINI UIDSS-Shell.ini LoadExternal yarn_queue)
+driver_memory_DPI_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadExternal driver_memory_DPI_INFO_MBL)
+num_executors_DPI_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadExternal num_executors_DPI_INFO_MBL)
+executor_memory_DPI_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadExternal executor_memory_DPI_INFO_MBL)
+executor_cores_DPI_INFO_MBL=$(__readINI UIDSS-Shell.ini LoadExternal executor_cores_DPI_INFO_MBL)
+driver_memory_DPI_INFO_WB=$(__readINI UIDSS-Shell.ini LoadExternal driver_memory_DPI_INFO_WB)
+num_executors_DPI_INFO_WB=$(__readINI UIDSS-Shell.ini LoadExternal num_executors_DPI_INFO_WB)
+executor_memory_DPI_INFO_WB=$(__readINI UIDSS-Shell.ini LoadExternal executor_memory_DPI_INFO_WB)
+executor_cores_DPI_INFO_WB=$(__readINI UIDSS-Shell.ini LoadExternal executor_cores_DPI_INFO_WB)
 
 for i in "${!array_province[@]}"
 do
   #Load external mobile user data
-  spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5    --executor-memory 10g     --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData DPI_INFO_MBL     ${hdfs_base_dir}/${array_province[i]}/${mbl_dir}/${cur_month}/    0   &
+  spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory ${driver_memory_DPI_INFO_MBL}  --num-executors ${num_executors_DPI_INFO_MBL}    --executor-memory  ${executor_memory_DPI_INFO_MBL}   --executor-cores  ${executor_cores_DPI_INFO_MBL}    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData DPI_INFO_MBL     ${hdfs_base_dir}/${array_province[i]}/${mbl_dir}/${cur_month}/    0   &
   #Load external wide-band user data
-  spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory 10g  --num-executors 5     --executor-memory 10g     --executor-cores 1    --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData DPI_INFO_WB    ${hdfs_base_dir}/${array_province[i]}/${wb_dir}/${cur_month}/    0   &
+  spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory  ${driver_memory_DPI_INFO_WB}  --num-executors  ${num_executors_DPI_INFO_WB}   --executor-memory  ${executor_memory_DPI_INFO_WB}   --executor-cores  ${executor_cores_DPI_INFO_WB}   --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData DPI_INFO_WB    ${hdfs_base_dir}/${array_province[i]}/${wb_dir}/${cur_month}/    0   &
   printf "External data ${array_province[i]}/${cur_month} is loaded\n"
 done
