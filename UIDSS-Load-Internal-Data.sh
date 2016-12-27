@@ -62,5 +62,6 @@ do
     #Internal wide-band user data
     spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --driver-memory ${driver_memory_UID_INFO_WB}  --num-executors  ${num_executors_UID_INFO_WB}    --executor-memory  ${executor_memory_UID_INFO_WB}    --executor-cores  ${executor_cores_UID_INFO_WB}   --queue ${yarn_queue}  UIDSS-0.30-jar-with-dependencies.jar  Y_LoadRawData UID_INFO_WB    ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${cur_month}/ ${hdfs_base_dir}/${wb_dir}/${array_province[i]}/${pre_month}/ &
   fi
+  wait
   printf "Internal data ${array_province[i]}/${cur_month}/ is loaded\n"
 done
