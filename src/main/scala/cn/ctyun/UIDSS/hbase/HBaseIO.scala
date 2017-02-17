@@ -78,8 +78,15 @@ object HBaseIO extends Logging {
 
   def saveToGraphTable(sc: SparkContext, props: Properties, rddToSave: RDD[((String, String), String)]): Int = {
 
+    var rddToSavePartition = rddToSave
+    
+    val partNumHBaseO = props.getProperty("rddPartNumHBaseO").toInt
+    if (partNumHBaseO > 0) {
+      rddToSavePartition = rddToSave.repartition(partNumHBaseO)
+    }
+    
     //多分区并行输出
-    rddToSave.foreachPartition {
+    rddToSavePartition.foreachPartition {
 
       //一个分区内的所有行     
       case (rows) =>
@@ -93,7 +100,10 @@ object HBaseIO extends Logging {
         hconf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"));
         hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number")); 
-    
+
+        hconf.set("hbase.client.pause", props.getProperty("1000")); 
+        hconf.set("zookeeper.recovery.retry", props.getProperty("3")); 
+        
         hconf.addResource("./resources/core-site.xml")
         hconf.addResource("./resources/hbase-site.xml")
         hconf.addResource("./resources/hdfs-site.xml")
@@ -104,7 +114,7 @@ object HBaseIO extends Logging {
         val flushInBatch = props.getProperty("flushInBatch")
         if (flushInBatch != null && "1".compareToIgnoreCase(flushInBatch) == 0) {
           htable.setAutoFlushTo(false);
-          htable.setWriteBufferSize(1024 * 1024 * 16);
+          htable.setWriteBufferSize(1024 * 1024 * 4);
         }
 
         //println(getNowDate() + " ****** Start writing to HBase   ******")

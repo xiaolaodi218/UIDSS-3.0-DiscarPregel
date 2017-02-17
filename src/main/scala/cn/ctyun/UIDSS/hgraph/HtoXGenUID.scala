@@ -69,16 +69,6 @@ object HtoXGenUID extends Logging {
     }
   }
   
-  private var printCount_2 = 1
-  def getPrintCount_2() = {
-    if (printCount_2 > 0) {
-      printCount_2 = printCount_2 - 1
-      1
-    } else {
-      0
-    }
-  }
-  
   var rddVidtoLinks: RDD[(Long, (String, String))] = null
 
   def isDebugVert(vert: String): Boolean = {

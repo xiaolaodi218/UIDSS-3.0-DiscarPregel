@@ -201,10 +201,6 @@ object GenUIDExtCmd extends Logging {
     //---  ((IDb5eafeb6f2e8228df4c23fc2e4f1f0b2,zzUDc7e88a94542343fa83ff7a5b6c18c57e),1)
     info(getNowDate() + " ****** 计算出所有要添加的（原来没有UID的节点，增加到），更新的  ******")
     var rddNewRelations = XtoHGenUIDExt(rddGroupWithUID)
-    val partNumHBaseO = props.getProperty("rddPartNumHBaseO").toInt
-    if (partNumHBaseO > 0) {
-      rddNewRelations = rddNewRelations.repartition(partNumHBaseO)
-    }
     //println("rddNewRelations is:  " +  rddNewRelations.collect().mkString("\n"))
 
     /********七、保存UID边到HBase *******/
