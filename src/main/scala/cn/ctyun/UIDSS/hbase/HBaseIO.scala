@@ -46,9 +46,9 @@ object HBaseIO extends Logging {
     hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"));
     hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number")); 
     
-    hconf.addResource("./resources/core-site.xml")
-    hconf.addResource("./resources/hbase-site.xml")
-    hconf.addResource("./resources/hdfs-site.xml")
+    hconf.addResource("core-site.xml")
+    hconf.addResource("hbase-site.xml")
+    hconf.addResource("hdfs-site.xml")      
 
     //set which table to scan
     hconf.set(TableInputFormat.INPUT_TABLE, props.getProperty("hbaseTableName"))
@@ -83,6 +83,9 @@ object HBaseIO extends Logging {
     val partNumHBaseO = props.getProperty("rddPartNumHBaseO").toInt
     if (partNumHBaseO > 0) {
       rddToSavePartition = rddToSave.repartition(partNumHBaseO)
+      val cnt= rddToSavePartition.count().toString() 
+      info(" ******  Writing " + cnt + " rows to HBase ******")
+      println(" ******  Writing " + cnt + " rows to HBase ******")
     }
     
     //多分区并行输出
@@ -101,25 +104,30 @@ object HBaseIO extends Logging {
         hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"));
         hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number")); 
 
-        hconf.set("hbase.client.pause", props.getProperty("1000")); 
-        hconf.set("zookeeper.recovery.retry", props.getProperty("3")); 
+        hconf.set("hbase.client.pause", "1000"); 
+        hconf.set("zookeeper.recovery.retry", "3"); 
         
-        hconf.addResource("./resources/core-site.xml")
-        hconf.addResource("./resources/hbase-site.xml")
-        hconf.addResource("./resources/hdfs-site.xml")
+        hconf.addResource("core-site.xml")
+        hconf.addResource("hbase-site.xml")
+        hconf.addResource("hdfs-site.xml")        
         val connection = HConnectionManager.createConnection(hconf);
         val htable: HTableInterface = connection.getTable(props.getProperty("hbaseTableName"));
 
         //批量写入
         val flushInBatch = props.getProperty("flushInBatch")
+        val sWaitForHBase = props.getProperty("waitForHBase")
+        var waitForHBase = 0
         if (flushInBatch != null && "1".compareToIgnoreCase(flushInBatch) == 0) {
           htable.setAutoFlushTo(false);
-          htable.setWriteBufferSize(1024 * 1024 * 4);
+          htable.setWriteBufferSize(1024 * 1024 * 16);
+          if (sWaitForHBase != null && sWaitForHBase.toInt > 0) {
+            waitForHBase = sWaitForHBase.toInt
+          }
         }
 
         //println(getNowDate() + " ****** Start writing to HBase   ******")
 
-        //var rowCount = 0 
+        var rowCount = 0 
         
         for (row <- rows.toArray) (
           {
@@ -134,8 +142,10 @@ object HBaseIO extends Logging {
             put.setWriteToWAL(false)
             htable.put(put)
             
-            //rowCount = rowCount +1
-            //if ((rowCount % 1000)==0) { println(getNowDate() + " ****** Writing " + rowCount + " rows "  + src + " to " + dst + " to HBase ******")}
+            rowCount = rowCount +1
+
+            //降低写入速度
+            if ((rowCount % 1000)==0 && waitForHBase >0) { Thread.sleep(waitForHBase)}
           })
         //println(getNowDate() + " ****** Finished writing to HBase   ******")  
         htable.flushCommits()

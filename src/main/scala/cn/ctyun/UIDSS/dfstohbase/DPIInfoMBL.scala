@@ -71,70 +71,70 @@ object DPIInfoMBL extends Logging{
       val IDFA = fields(10);
       val AndroidID = fields(11);
 
-      if (null != MDN && MDN.length() > 7) {
+      if (null != MDN && MDN.length() > 7 && MDN.length() < 100) {
 
         // 添加QQ号与手机号关系			
-        if (null != QQ && QQ.length() >= 5) {          	
+        if (null != QQ && QQ.length() >= 5 && QQ.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_QQ + QQ), weight))
           buf += (((HGraphUtil.STR_QQ + QQ, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }
 
         // 添加IMSI与电话号码关系
-        if (null != IMSI && IMSI.length() >= 5) {          	
+        if (null != IMSI && IMSI.length() >= 5 && IMSI.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_IMSI + IMSI), weight))
           buf += (((HGraphUtil.STR_IMSI + IMSI, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }
 
         // 添加MEID与电话号码关系
-        if (null != MEID && MEID.length() >= 5) {          	
+        if (null != MEID && MEID.length() >= 5 && MEID.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MEID + MEID), weight))
           buf += (((HGraphUtil.STR_MEID + MEID, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }
 
         // 添加WEIBO与电话号码关系
-        if (null != WEIBO && WEIBO.length() >= 5) {          	
+        if (null != WEIBO && WEIBO.length() >= 5 && WEIBO.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_WEIBO + WEIBO), weight))
           buf += (((HGraphUtil.STR_WEIBO + WEIBO, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }
 
         // 添加E_MAIL与电话号码关系
-        if (null != E_MAIL && E_MAIL.length() >= 5) {          	
+        if (null != E_MAIL && E_MAIL.length() >= 5 && E_MAIL.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_EMAIL + E_MAIL), weight))
           buf += (((HGraphUtil.STR_EMAIL + E_MAIL, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }
 
         // 添加sdkimsi与电话号码关系
-        if (null != sdkimsi && sdkimsi.length() >= 5) {          	
+        if (null != sdkimsi && sdkimsi.length() >= 5 && sdkimsi.length() < 100 ) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkimsi + sdkimsi), weight))
           buf += (((HGraphUtil.STR_sdkimsi + sdkimsi, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }        
         
         // 添加sdkudid与电话号码关系
-        if (null != sdkudid && sdkudid.length() >= 5) {          	
+        if (null != sdkudid && sdkudid.length() >= 5 && sdkudid.length() <100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkudid + sdkudid), weight))
           buf += (((HGraphUtil.STR_sdkudid + sdkudid, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }                
 
         // 添加taobao_ID与电话号码关系
-        if (null != taobao_ID && taobao_ID.length() >= 5) {          	
+        if (null != taobao_ID && taobao_ID.length() >= 5 && taobao_ID.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_TAOBAO_ID + taobao_ID), weight))
           buf += (((HGraphUtil.STR_TAOBAO_ID + taobao_ID, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }                
 
         // 添加jd_ID与电话号码关系
-        if (null != jd_ID && jd_ID.length() >= 5) {          	
+        if (null != jd_ID && jd_ID.length() >= 5 && jd_ID.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_JD_ID + jd_ID), weight))
           buf += (((HGraphUtil.STR_JD_ID + jd_ID, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }                   
 
         // 添加IDFA与电话号码关系
-         if (null != IDFA && IDFA.length() >= 5) {          	
+         if (null != IDFA && IDFA.length() >= 5 && IDFA.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_IDFA + IDFA), weight))
           buf += (((HGraphUtil.STR_IDFA + IDFA, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }          
          
         // 添加AndroidID与电话号码关系
-        if (null != AndroidID && AndroidID.length() >= 5) {          	
+        if (null != AndroidID && AndroidID.length() >= 5 && AndroidID.length() < 100) {          	
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_AndroidID + AndroidID), weight))
           buf += (((HGraphUtil.STR_AndroidID + AndroidID, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }          

@@ -72,27 +72,27 @@ object UIDInfoWB extends Logging{
       val CUST_ID = fields(base+4);
       val ACCT_ID = fields(base+6);
 
-      if (null != WB_NBR && WB_NBR.length() > 7) {
+      if (null != WB_NBR && WB_NBR.length() > 7 && WB_NBR.length() < 100) {
         // 添加产品实例与手机号关系				
-        if (null != PROD_INST_ID && PROD_INST_ID.length() > 5) {
+        if (null != PROD_INST_ID && PROD_INST_ID.length() > 5 && PROD_INST_ID.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_NBR, HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_PROD_INST + LANT_ID + PROD_INST_ID), weight))
           buf += (((HGraphUtil.STR_PROD_INST + LANT_ID + PROD_INST_ID, HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_WB_NUM + WB_NBR), weight))
         }
         
         // 添加手机号与身份证号关系
-        if (null != ID_NUM && ID_NUM.length() > 5) { 
+        if (null != ID_NUM && ID_NUM.length() > 5 && ID_NUM.length() < 100) { 
           buf += (((HGraphUtil.STR_WB_NUM + WB_NBR,  HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_ID_NUM + ID_NUM), weight))
           buf += (((HGraphUtil.STR_ID_NUM + ID_NUM,  HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_WB_NUM + WB_NBR), weight))
         }  
 
         // 添加手机号与客户ID关系
-        if (null != CUST_ID && CUST_ID.length() > 5) { 
+        if (null != CUST_ID && CUST_ID.length() > 5 && CUST_ID.length() < 100) { 
           buf += (((HGraphUtil.STR_WB_NUM + WB_NBR,  HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_CUST_ID + LANT_ID + CUST_ID), weight))
           buf += (((HGraphUtil.STR_CUST_ID + LANT_ID + CUST_ID,  HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_WB_NUM + WB_NBR), weight))
         }  		
 
         // 添加ACCT_ID与手机号关系
-        if (null != ACCT_ID && ACCT_ID.length() > 5 ) { 
+        if (null != ACCT_ID && ACCT_ID.length() > 5 && ACCT_ID.length() < 100 ) { 
           buf += (((HGraphUtil.STR_WB_NUM + WB_NBR,  HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_ACCT_ID + ACCT_ID), weight))
           buf += (((HGraphUtil.STR_ACCT_ID + ACCT_ID,  HGraphUtil.STR_TABLE_UID_INFO_WB + HGraphUtil.STR_WB_NUM + WB_NBR), weight))
         }

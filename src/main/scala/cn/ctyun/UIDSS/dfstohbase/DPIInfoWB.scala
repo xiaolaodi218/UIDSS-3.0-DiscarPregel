@@ -121,172 +121,172 @@ object DPIInfoWB extends Logging{
       val AndroidID2 = fields(35);
       val AndroidID3 = fields(36);
 
-      if (null != WB_Num && WB_Num.length() > 7) {
+      if (null != WB_Num && WB_Num.length() > 7 && WB_Num.length() < 100) {
 
         // 添加QQ号与宽带号关系			
-        if (null != QQ1 && QQ1.length() >= 5) {
+        if (null != QQ1 && QQ1.length() >= 5 && QQ1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_QQ + QQ1), weight))
           buf += (((HGraphUtil.STR_QQ + QQ1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != QQ2 && QQ2.length() >= 5) {
+        if (null != QQ2 && QQ2.length() >= 5 && QQ2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_QQ + QQ2), weight))
           buf += (((HGraphUtil.STR_QQ + QQ2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != QQ3 && QQ3.length() >= 5) {
+        if (null != QQ3 && QQ3.length() >= 5 && QQ3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_QQ + QQ3), weight))
           buf += (((HGraphUtil.STR_QQ + QQ3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加WEIBO与宽带号码关系
-        if (null != WEIBO1 && WEIBO1.length() >= 5) {
+        if (null != WEIBO1 && WEIBO1.length() >= 5 && WEIBO1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WEIBO + WEIBO1), weight))
           buf += (((HGraphUtil.STR_WEIBO + WEIBO1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != WEIBO2 && WEIBO2.length() >= 5) {
+        if (null != WEIBO2 && WEIBO2.length() >= 5 && WEIBO2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WEIBO + WEIBO2), weight))
           buf += (((HGraphUtil.STR_WEIBO + WEIBO2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != WEIBO3 && WEIBO3.length() >= 5) {
+        if (null != WEIBO3 && WEIBO3.length() >= 5 && WEIBO3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WEIBO + WEIBO3), weight))
           buf += (((HGraphUtil.STR_WEIBO + WEIBO3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加E_MAIL与宽带号码关系
-        if (null != E_MAIL1 && E_MAIL1.length() >= 5) {
+        if (null != E_MAIL1 && E_MAIL1.length() >= 5 && E_MAIL1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_EMAIL + E_MAIL1), weight))
           buf += (((HGraphUtil.STR_EMAIL + E_MAIL1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != E_MAIL2 && E_MAIL2.length() >= 5) {
+        if (null != E_MAIL2 && E_MAIL2.length() >= 5 && E_MAIL2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_EMAIL + E_MAIL2), weight))
           buf += (((HGraphUtil.STR_EMAIL + E_MAIL2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != E_MAIL3 && E_MAIL3.length() >= 5) {
+        if (null != E_MAIL3 && E_MAIL3.length() >= 5 && E_MAIL3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_EMAIL + E_MAIL3), weight))
           buf += (((HGraphUtil.STR_EMAIL + E_MAIL3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加taobao_ID与宽带号码关系
-        if (null != taobao_ID1 && taobao_ID1.length() >= 5) {
+        if (null != taobao_ID1 && taobao_ID1.length() >= 5 && taobao_ID1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_TAOBAO_ID + taobao_ID1), weight))
           buf += (((HGraphUtil.STR_TAOBAO_ID + taobao_ID1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != taobao_ID2 && taobao_ID2.length() >= 5) {
+        if (null != taobao_ID2 && taobao_ID2.length() >= 5 && taobao_ID2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_TAOBAO_ID + taobao_ID2), weight))
           buf += (((HGraphUtil.STR_TAOBAO_ID + taobao_ID2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != taobao_ID3 && taobao_ID3.length() >= 5) {
+        if (null != taobao_ID3 && taobao_ID3.length() >= 5 && taobao_ID3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_TAOBAO_ID + taobao_ID3), weight))
           buf += (((HGraphUtil.STR_TAOBAO_ID + taobao_ID3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加jd_ID与宽带号码关系
-        if (null != jd_ID1 && jd_ID1.length() >= 5) {
+        if (null != jd_ID1 && jd_ID1.length() >= 5 && jd_ID1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_JD_ID + jd_ID1), weight))
           buf += (((HGraphUtil.STR_JD_ID + jd_ID1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != jd_ID2 && jd_ID2.length() >= 5) {
+        if (null != jd_ID2 && jd_ID2.length() >= 5 && jd_ID2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_JD_ID + jd_ID2), weight))
           buf += (((HGraphUtil.STR_JD_ID + jd_ID2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != jd_ID3 && jd_ID3.length() >= 5) {
+        if (null != jd_ID3 && jd_ID3.length() >= 5 && jd_ID3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_JD_ID + jd_ID3), weight))
           buf += (((HGraphUtil.STR_JD_ID + jd_ID3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加MDN与宽带号码关系
-        if (null != MDN1 && MDN1.length() >= 5) {
+        if (null != MDN1 && MDN1.length() >= 5 && MDN1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN1), weight))
           buf += (((HGraphUtil.STR_MBL_NUM + MDN1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != MDN2 && MDN2.length() >= 5) {
+        if (null != MDN2 && MDN2.length() >= 5 && MDN2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN2), weight))
           buf += (((HGraphUtil.STR_MBL_NUM + MDN2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != MDN3 && MDN3.length() >= 5) {
+        if (null != MDN3 && MDN3.length() >= 5 && MDN3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN3), weight))
           buf += (((HGraphUtil.STR_MBL_NUM + MDN3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加sdkimsi与宽带号码关系
-        if (null != sdkimsi1 && sdkimsi1.length() >= 5) {
+        if (null != sdkimsi1 && sdkimsi1.length() >= 5 && sdkimsi1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkimsi + sdkimsi1), weight))
           buf += (((HGraphUtil.STR_sdkimsi + sdkimsi1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != sdkimsi2 && sdkimsi2.length() >= 5) {
+        if (null != sdkimsi2 && sdkimsi2.length() >= 5 && sdkimsi2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkimsi + sdkimsi2), weight))
           buf += (((HGraphUtil.STR_sdkimsi + sdkimsi2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != sdkimsi3 && sdkimsi3.length() >= 5) {
+        if (null != sdkimsi3 && sdkimsi3.length() >= 5 && sdkimsi3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkimsi + sdkimsi3), weight))
           buf += (((HGraphUtil.STR_sdkimsi + sdkimsi3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加sdkudid与宽带号码关系
-        if (null != sdkudid1 && sdkudid1.length() >= 5) {
+        if (null != sdkudid1 && sdkudid1.length() >= 5 && sdkudid1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkudid + sdkudid1), weight))
           buf += (((HGraphUtil.STR_sdkudid + sdkudid1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != sdkudid2 && sdkudid2.length() >= 5) {
+        if (null != sdkudid2 && sdkudid2.length() >= 5 && sdkudid2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkudid + sdkudid2), weight))
           buf += (((HGraphUtil.STR_sdkudid + sdkudid2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != sdkudid3 && sdkudid3.length() >= 5) {
+        if (null != sdkudid3 && sdkudid3.length() >= 5 && sdkudid3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_sdkudid + sdkudid3), weight))
           buf += (((HGraphUtil.STR_sdkudid + sdkudid3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加IDFA与宽带号码关系
-        if (null != IDFA1 && IDFA1.length() >= 5) {
+        if (null != IDFA1 && IDFA1.length() >= 5 && IDFA1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IDFA + IDFA1), weight))
           buf += (((HGraphUtil.STR_IDFA + IDFA1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != IDFA2 && IDFA2.length() >= 5) {
+        if (null != IDFA2 && IDFA2.length() >= 5 && IDFA2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IDFA + IDFA2), weight))
           buf += (((HGraphUtil.STR_IDFA + IDFA2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != IDFA3 && IDFA3.length() >= 5) {
+        if (null != IDFA3 && IDFA3.length() >= 5 && IDFA3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IDFA + IDFA3), weight))
           buf += (((HGraphUtil.STR_IDFA + IDFA3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加IMSI与宽带号码关系
-        if (null != IMSI1 && IMSI1.length() >= 5) {
+        if (null != IMSI1 && IMSI1.length() >= 5 && IMSI1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IMSI + IMSI1), weight))
           buf += (((HGraphUtil.STR_IMSI + IMSI1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != IMSI2 && IMSI2.length() >= 5) {
+        if (null != IMSI2 && IMSI2.length() >= 5 && IMSI2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IMSI + IMSI2), weight))
           buf += (((HGraphUtil.STR_IMSI + IMSI2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != IMSI3 && IMSI3.length() >= 5) {
+        if (null != IMSI3 && IMSI3.length() >= 5 && IMSI3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IMSI + IMSI3), weight))
           buf += (((HGraphUtil.STR_IMSI + IMSI3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加IMEI与宽带号码关系
-        if (null != IMEI1 && IMEI1.length() >= 5) {
+        if (null != IMEI1 && IMEI1.length() >= 5 && IMEI1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IMEI + IMEI1), weight))
           buf += (((HGraphUtil.STR_IMEI + IMEI1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != IMEI2 && IMEI2.length() >= 5) {
+        if (null != IMEI2 && IMEI2.length() >= 5 && IMEI2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IMEI + IMEI2), weight))
           buf += (((HGraphUtil.STR_IMEI + IMEI2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != IMEI3 && IMEI3.length() >= 5) {
+        if (null != IMEI3 && IMEI3.length() >= 5 && IMEI3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IMEI + IMEI3), weight))
           buf += (((HGraphUtil.STR_IMEI + IMEI3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
         // 添加AndroidID与宽带号码关系
-        if (null != AndroidID1 && AndroidID1.length() >= 5) {
+        if (null != AndroidID1 && AndroidID1.length() >= 5 && AndroidID1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_AndroidID + AndroidID1), weight))
           buf += (((HGraphUtil.STR_AndroidID + AndroidID1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != AndroidID2 && AndroidID2.length() >= 5) {
+        if (null != AndroidID2 && AndroidID2.length() >= 5 && AndroidID2.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_AndroidID + AndroidID2), weight))
           buf += (((HGraphUtil.STR_AndroidID + AndroidID2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
-        if (null != AndroidID3 && AndroidID3.length() >= 5) {
+        if (null != AndroidID3 && AndroidID3.length() >= 5 && AndroidID3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_AndroidID + AndroidID3), weight))
           buf += (((HGraphUtil.STR_AndroidID + AndroidID3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }

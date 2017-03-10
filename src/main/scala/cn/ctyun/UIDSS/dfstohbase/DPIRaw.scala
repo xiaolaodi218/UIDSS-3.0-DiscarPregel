@@ -57,7 +57,7 @@ object DPIRaw {
       val ACCS_NBR = fields(2);
       val IMSI = fields(3);
  
-      if (null != ACCS_NBR && ACCS_NBR.length() > 7) {
+      if (null != ACCS_NBR && ACCS_NBR.length() > 7 && ACCS_NBR.length() < 100) {
         // 添加产品实例与手机号关系				
         buf += (((HGraphUtil.CLMN_ACCS_NUM + ACCS_NBR, HGraphUtil.CLMN_PROD_INST + LANT_ID + PROD_INST_ID), weight))
 
