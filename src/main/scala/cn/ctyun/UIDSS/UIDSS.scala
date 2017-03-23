@@ -35,6 +35,8 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import java.util.concurrent.{Executors, ExecutorService}
+
 object UIDSS extends Logging {
 
   val APP_PROP_NAME = "user-id-server.properties"; //集群属性文件  
@@ -56,7 +58,7 @@ object UIDSS extends Logging {
     conf.set("spark.shuffle.manager", "sort")
 
     if (cmd.substring(0, 2).compareTo("L_") == 0) {
-      conf.setMaster("local[4]").setAppName("UIDSS-Local")
+      conf.setMaster("local[2]").setAppName("UIDSS-Local")
       cmd = cmd.substring(2)
 
     } else if (cmd.substring(0, 2).compareTo("Y_") == 0) { //run on remote server
@@ -65,9 +67,13 @@ object UIDSS extends Logging {
     } else { //run on remote server
       conf.setAppName("UIDSS")
     }
-
+    
     val sc = new SparkContext(conf)
+    
+    //监控线程
+    Executors.newSingleThreadExecutor().execute(new MonitorThread(sc))
 
+    
     cmd match {
       case "BatchQuery"     => BatchQueryCmd.execute(sc, props)
       case "GenerateUID"    => GenUIDCmd.execute(sc, props)
@@ -95,6 +101,9 @@ object UIDSS extends Logging {
       }
       case _ => info("Not a valid command!")
     }
+    
+    println("Program finished !")
+    sc.stop()
   }
 
   def getTimestamp(x: String): Long = {
@@ -108,3 +117,34 @@ object UIDSS extends Logging {
     return 0L
   }
 }
+
+class MonitorThread(sc: SparkContext) extends Runnable {
+  override def run() {
+    var timeTooFewExector = 0
+    var timeExit = 0
+    while (true) {
+      val iActiveJob = sc.statusTracker.getActiveJobIds().length
+      if (iActiveJob > 0) {
+        if (sc.getExecutorMemoryStatus.size < 2) {
+          timeTooFewExector += 1
+          if (timeTooFewExector > 600) {
+            //只有driver在运行，超过60秒
+            println("************UIDSS  is shut down, because too few executors! ****************")
+            sc.stop()
+            return
+          }
+        } else {
+          timeTooFewExector = 0
+        }
+      } else {
+        //没有活动job，超过60秒
+        timeExit += 1
+        if (timeExit > 600) {
+            return
+         }
+      }
+      Thread.sleep(1000)
+    }
+  }
+}
+

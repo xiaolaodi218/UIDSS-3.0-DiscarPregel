@@ -75,11 +75,10 @@ class UIDGraph(group: List[(String, String)]) {
 */
   private def init() = {
     var needPrint = false
-    //println("********************  UIDGraph.init ***************************" + group.toString() )
     for (v <- group) {
-      if ("QQ974834277".compareToIgnoreCase(v._1) == 0) {
-        needPrint = true
-      }
+//      if ("QQ974834277".compareToIgnoreCase(v._1) == 0) {
+//        needPrint = true
+//      }
       //1.所有节点放到图(即邻接数组)中
       val fields = v._2.split(";")
       if (v._2.length() > 0 && fields.size > 0) {
@@ -171,7 +170,7 @@ class UIDGraph(group: List[(String, String)]) {
       //根据关联强度，关联同一用户的号码，        
       //如果优化，可以移出已经加过的? 不行可能共用同一号码.
       for (linkgroup <- linkgroups) {
-        if (isSameUser(an, linkgroup._1, linkgroup._2)) {
+        if (isSameUserNew(an, linkgroup._1, linkgroup._2)) {
           //是有向的所以只用加入一条边
           if (gEqu.contains(an)) {
             var cns = gEqu.get(an).get
@@ -214,7 +213,6 @@ class UIDGraph(group: List[(String, String)]) {
               idLnks += (vDst -> Set(vInter))
             }
           }
-
         }
       }
     }
@@ -228,7 +226,7 @@ class UIDGraph(group: List[(String, String)]) {
     var iTDID = 0;
     var iID = 0;
     var iCI = 0;
-
+    
     for (vInter <- idLnks) {
       val typ = vInter.substring(0, 2)
       val styp = vSrc.substring(0, 2)
@@ -261,6 +259,112 @@ class UIDGraph(group: List[(String, String)]) {
     iweight >= 1
   }
 
+  //根据规则确定是否是同一用户的
+  private def isSameUserNew(vSrc: String, vDst: String, idLnks: Set[String]) = {
+    var iQQ = 0
+    var iTDID = 0
+    var iID = 0
+    var iCI = 0
+
+    var iSrcHasQQ = hasQQNeighbor(vSrc)
+    var iDstHasQQ = hasQQNeighbor(vDst)
+
+    var sID = ""
+    var sCust_ID = ""
+
+    for (vInter <- idLnks) {
+      val typ = vInter.substring(0, 2)
+      val styp = vSrc.substring(0, 2)
+      val dtyp = vDst.substring(0, 2)
+
+      typ match {
+        case HGraphUtil.STR_QQ => {
+          iQQ = iQQ + 1
+        }
+        case "TDID" => {
+          iTDID = iTDID + 1
+        }
+        case HGraphUtil.STR_ID_NUM => {
+          //只有移动号与固话号之间可以通过ID相等
+          if (styp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0 && dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0) {
+            iID = iID + 1
+            sID = vInter
+          }
+        }
+        case HGraphUtil.STR_CUST_ID => {
+          //只有移动号与固话号之间可以通过ID相等
+          if (styp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0 && dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0) {
+            iCI = iCI + 1
+            sCust_ID = vInter
+          }
+        }
+        case _ =>
+      }
+    }
+
+    var iweight = 0
+
+    if (iQQ > 0) {
+      //IF网络账号(QQ/TDID)相同
+      //IF[
+      //(客户ID相同 and (身份证相同 | 身份证号为空) and (移动接入号码非空))|
+      //((客户ID不同 and 身份证号相同 and (移动接入号码不同 and 固网接入号码相同)) |
+      //((客户ID不同 and 身份证号为空 and (移动接入号码不同 | (移动接入号码相同 and 固网接入号码不同))) |
+      //( 客户ID不同 and 身份证号不同 and ((移动接入号码不同 and (固网接入号码不同 |固网接入号码空)) | (移动接入号码相同 and固网接入号码不同))) |
+      //(客户ID不同 and身份证号不同 and ((移动号码不同) | (移动接入号码相同 and 固网接入号码不同))) |
+      //(客户ID不同 and身份证号相同 and移动号码不同 and固网接入号码不同) |
+      //[客户ID不同 and 身份证号相同 and移动接入号码不同 and 固网接入号码为空] |
+      //(客户ID不同 and身份证号空 and ((移动接入号码相同 and 固网接入号码非空) | (移动接入号码不同 and (固网接入号码为空 | 固网接入号码不同))))
+      //]
+      iweight = 1
+    } else {
+      //没有网络帐号(QQ/TDID)
+      //IF[(归属城市标识相同 and客户ID相同 and 身份证号码相同 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空)) |
+      //(归属城市标识相同 and客户ID相同 and 身份证号码空 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空))
+      //]
+      //		生成唯一UID
+      if (iSrcHasQQ < 1 && iDstHasQQ < 1) {
+        if ((iCI == 1 && countMobileNeighbors(sCust_ID) == 1) 
+            && ((iID == 1 && countMobileNeighbors(sID) == 1) || (iID == 0))) {
+          iweight = 1
+        } else {
+          if ((iCI == 0) && (iID == 1 && countMobileNeighbors(sID) == 1) ) {
+            iweight = 1
+          }          
+        }          
+      }
+    }
+
+    iweight >= 1
+  }
+
+  //是否有QQ邻居节点
+  private def hasQQNeighbor(vSrc: String):Int={
+    var bHasQQ = 0
+    val lnks = g.getOrElse(vSrc, Set[String]())
+    for (vNeighbor <- lnks) {
+      val typ = vNeighbor.substring(0, 2)
+      if (typ.compareToIgnoreCase(HGraphUtil.STR_QQ) == 0) {
+        bHasQQ = 1
+      }
+    }
+    bHasQQ
+  }
+  
+  //是否有多个移动号邻居节点
+  private def countMobileNeighbors(vSrc: String):Int={
+    var iMobileNeighbors = 0
+    val lnks = g.getOrElse(vSrc, Set[String]())
+    for (vNeighbor <- lnks) {
+      val typ = vNeighbor.substring(0, 2)
+      if (typ.compareToIgnoreCase(HGraphUtil.STR_QQ) == 0) {
+        iMobileNeighbors += 1
+      }
+    }
+    iMobileNeighbors 
+  }
+  
+  
   //2.把同一用户的号码放在同一组，也就是独立用户( 包括1个或多个号码级用户合并的结果)
   private def getANGroups(): List[Set[String]] = {
     var angroups = List[Set[String]]()
@@ -269,9 +373,9 @@ class UIDGraph(group: List[(String, String)]) {
     for (an <- ans) {
       //println("an is " + an)
 
-      //只考虑含有移动号码的号码组
-      val typ = an.substring(0, 2)
-      if (typ.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
+//      //只考虑含有移动号码的号码组
+//      val typ = an.substring(0, 2)
+//      if (typ.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
 
         if (nodesVisitied.contains(an)) {
           //已经加入过  
@@ -281,16 +385,18 @@ class UIDGraph(group: List[(String, String)]) {
           angroups = angroups ::: List(nodesInHand)
 
           for (v <- nodesInHand) {
+//            //移动号码是只用一次
+//            val vtyp = v.substring(0, 2)
+//            if (vtyp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
+//              nodesVisitied += v
+//            }
             //移动号码是只用一次
-            val vtyp = v.substring(0, 2)
-            if (vtyp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
-              nodesVisitied += v
-            }
+             nodesVisitied += v
           }
           //nodesVisitied ++= nodesInHand
           nodesInHand = Set[String]()
         }
-      }
+//      }
 
     }
     angroups
@@ -314,10 +420,12 @@ class UIDGraph(group: List[(String, String)]) {
             // 按距离过滤。
             // 如果还没到底,继续深度优先遍历。
             if (depth > 1) {
-              //只有移动号码可以传递相等关系
-              if (typ.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
-                dfsAnGroups(con, depth - 1, nodesInHand);
-              }
+//              //只有移动号码可以传递相等关系
+//              if (typ.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
+//                dfsAnGroups(con, depth - 1, nodesInHand);
+//              }
+              //相等关系在之前已判断，可以通过固网号传递
+            dfsAnGroups(con, depth - 1, nodesInHand);
             }
           }
         }
