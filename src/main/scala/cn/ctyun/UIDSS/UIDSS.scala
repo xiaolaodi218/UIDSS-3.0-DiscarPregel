@@ -137,9 +137,9 @@ class MonitorThread(sc: SparkContext) extends Runnable {
           timeTooFewExector = 0
         }
       } else {
-        //没有活动job，超过60秒
+        //没有活动job，超过300秒
         timeExit += 1
-        if (timeExit > 600) {
+        if (timeExit > 300) {
             return
          }
       }

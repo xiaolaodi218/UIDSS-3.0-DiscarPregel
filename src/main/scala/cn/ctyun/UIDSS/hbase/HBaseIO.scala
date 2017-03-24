@@ -116,10 +116,12 @@ object HBaseIO extends Logging {
         //批量写入
         val flushInBatch = props.getProperty("flushInBatch")
         val sWaitForHBase = props.getProperty("waitForHBase")
+        val batchSize = props.getProperty("batchSize")
+        
         var waitForHBase = 0
         if (flushInBatch != null && "1".compareToIgnoreCase(flushInBatch) == 0) {
           htable.setAutoFlushTo(false);
-          htable.setWriteBufferSize(1024 * 1024 * 16);
+          htable.setWriteBufferSize(1024 * 1024 * batchSize.toInt);
           if (sWaitForHBase != null && sWaitForHBase.toInt > 0) {
             waitForHBase = sWaitForHBase.toInt
           }
