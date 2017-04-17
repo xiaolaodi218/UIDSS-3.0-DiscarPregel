@@ -41,11 +41,13 @@ import cn.ctyun.UIDSS.utils.{ Utils, Logging }
 object GenUIDExt extends Logging{
 
   val initialMsg = GraphXUtil.MAX_VERTICE
-  var UID_PRIOR_QQ = 100
-  var UID_PRIOR_ID = 5
-  var UID_PRIOR_CI = 5
+  var UID_PRIOR_QQ = 2
+  var UID_PRIOR_ID = 1
+  var UID_PRIOR_CI = 1
   var UID_PRIOR_AN = 1
-
+  var UID_PRIOR_WN = 1
+  var UID_PRIOR_MN = 2
+  
   def getUID(group: List[(String, String)]): Iterable[(String, List[(String, String)])] = {
 
     //println("********************  GenUIDExt.getUID ***************************")
@@ -84,6 +86,8 @@ object GenUIDExt extends Logging{
     if (props.getProperty("UID_PRIOR_ID").length() > 0) UID_PRIOR_ID = props.getProperty("UID_PRIOR_ID").toInt
     if (props.getProperty("UID_PRIOR_CI").length() > 0) UID_PRIOR_CI = props.getProperty("UID_PRIOR_CI").toInt
     if (props.getProperty("UID_PRIOR_AN").length() > 0) UID_PRIOR_AN = props.getProperty("UID_PRIOR_AN").toInt
+    if (props.getProperty("UID_PRIOR_MN").length() > 0) UID_PRIOR_MN = props.getProperty("UID_PRIOR_MN").toInt
+    if (props.getProperty("UID_PRIOR_WN").length() > 0) UID_PRIOR_WN = props.getProperty("UID_PRIOR_WN").toInt
 
     //UID生成
     //算出优势UID，如果没有则要生成

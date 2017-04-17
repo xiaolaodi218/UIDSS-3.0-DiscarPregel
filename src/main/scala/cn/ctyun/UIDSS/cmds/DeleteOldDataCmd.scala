@@ -46,7 +46,7 @@ object DeleteOldDataCmd extends Logging {
         //mapToEdges(v)
         val buf = new ListBuffer[((String, String), String)]
 
-        val row = Bytes.toString(v.getRow)
+        val row = Bytes.toString(v.getRow.drop(2))
         val rowTy = row.substring(0, 2)
 
         var totalNonUID = 0

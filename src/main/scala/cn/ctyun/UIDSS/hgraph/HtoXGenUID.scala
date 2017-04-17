@@ -106,7 +106,7 @@ object HtoXGenUID extends Logging {
   //把HBase一行, 就是一个点的所有邻居   ( 1000001234567 , "AN12345,MN678910,...")
   def convertToLinks(sn: Long, v: Result): (Long, (String, String)) = {
     var links = ""
-    val row = Bytes.toString(v.getRow)
+    val row = Bytes.toString(v.getRow.drop(2))
 
     //超大节点暂不考虑
     val iNeighbors = v.rawCells().size
@@ -138,7 +138,7 @@ object HtoXGenUID extends Logging {
     val buf = new ListBuffer[(String, (Long, String))]
 
     //超大节点暂不考虑
-    val row = Bytes.toString(v.getRow)
+    val row = Bytes.toString(v.getRow.drop(2))
     val iNeighbors = v.rawCells().size
     if (isVertNeedProcessing(row, iNeighbors)) {
       //if (isDebugVert(row)) {  needPrint = true }
@@ -187,7 +187,7 @@ object HtoXGenUID extends Logging {
 //        val lst = vs.map {
 //          case (_, v) =>
 //            sn = sn + 1
-//            val row = Bytes.toString(v.getRow)
+//            val row = Bytes.toString(v.getRow.drop(2))
 //            if (isDebugVert(row)) {  println(row + "  is assigned sn of " + sn + " in partition " + ind) }
 //            (sn, v)
 //        }
@@ -204,7 +204,7 @@ object HtoXGenUID extends Logging {
     //val rddIdtoVId = rddHBaseWithSN.map[(String, (Long, String))] {
     val rddIdtoVId = rddHBaseWithSN.map {
       case (sn, v) =>
-        val id = Bytes.toString(v.getRow)
+        val id = Bytes.toString(v.getRow.drop(2))
         if (HtoXGenUID.getPrintCount() > 0) {
           println("**************************id is " + id +"\n")
           println("**************************sn is " + sn +"\n")
@@ -238,7 +238,7 @@ object HtoXGenUID extends Logging {
     //      case (sn, v) => {
     //        val buf = new ListBuffer[(Long, (String, Long))]
     //        //超大节点暂不考虑
-    //        val row = Bytes.toString(v.getRow)
+    //        val row = Bytes.toString(v.getRow.drop(2))
     //        val iNeighbors = v.rawCells().size
     //        if (isVertNeedProcessing(row, iNeighbors)) {
     //          buf += ((sn, (row.substring(0, 2), 0L)))

@@ -28,7 +28,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import java.util.Properties
 
-import utils.{ Utils, Logging }
+import utils.{ Utils, Logging, Hash }
 import cmds._
 
 import java.sql.Timestamp
@@ -43,6 +43,8 @@ object UIDSS extends Logging {
 
   def main(args: Array[String]) {
 
+//    println(Hash.getHashString("WN027"))
+    
     if (args.length < 1) {
       println("USAGE: spark-submit [options] <app jar | python file> [app options]".format())
       System.exit(0)

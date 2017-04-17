@@ -31,7 +31,7 @@ import org.apache.spark.SparkContext
 import java.util.Properties
 import org.apache.hadoop.hbase.util.Bytes
 import cn.ctyun.UIDSS.hgraph.HGraphUtil
-import cn.ctyun.UIDSS.utils.{ Utils, Logging }
+import cn.ctyun.UIDSS.utils.{ Utils, Logging, Hash }
 
 object HBaseIO extends Logging {
 
@@ -60,7 +60,7 @@ object HBaseIO extends Logging {
     //遍历输出
     //    rdd.foreach {
     //      case (_, result) =>
-    //        val key = Bytes.toString(result.getRow)
+    //        val key = Bytes.toString(result.getRow.drop(2))
     //        //println("Row key:" + key)
     //        for (c <- result.rawCells()) {
     //          val dst = Bytes.toString(c.getQualifier)
@@ -81,12 +81,12 @@ object HBaseIO extends Logging {
     var rddToSavePartition = rddToSave
     
     val partNumHBaseO = props.getProperty("rddPartNumHBaseO").toInt
-    if (partNumHBaseO > 0) {
-      rddToSavePartition = rddToSave.repartition(partNumHBaseO)
-      val cnt= rddToSavePartition.count().toString() 
-      info(" ******  Writing " + cnt + " rows to HBase ******")
-      println(" ******  Writing " + cnt + " rows to HBase ******")
-    }
+//    if (partNumHBaseO > 0) {
+//      rddToSavePartition = rddToSave.repartition(partNumHBaseO)
+//      val cnt= rddToSavePartition.count().toString() 
+//      info(" ******  Writing " + cnt + " rows to HBase ******")
+//      println(" ******  Writing " + cnt + " rows to HBase ******")
+//    }
     
     //多分区并行输出
     rddToSavePartition.foreachPartition {
@@ -134,7 +134,7 @@ object HBaseIO extends Logging {
         for (row <- rows.toArray) (
           {
             //row  ((行，列)，值）) 
-            var src: String = row._1._1
+            var src: String =  Hash.getHashString(row._1._1) + row._1._1 
             var dst: String = row._1._2
             var prop: Int = row._2.toInt
             //println("Row is: " + src + " ；column is: " + dst + " ; value is: " + prop)

@@ -85,7 +85,7 @@ object GenUIDExtCmd extends Logging {
         val lst = vs.map {
           case (_, v) =>
             sn = sn + 1
-            val row = Bytes.toString(v.getRow)
+            val row = Bytes.toString(v.getRow.drop(2))
             //if (isDebugVert(row)) {  println(row + "  is assigned sn of " + sn + " in partition " + ind) }
             (sn, v)
         }

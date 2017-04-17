@@ -33,7 +33,7 @@ object HtoXBatchQuery {
   //（目标节点id, (源节点sn, 连接类型)）
   //可以在这一步进行边的过滤，搜索时直接计算连接关系即可
   def convertForNormalSearch(sn: Long, v: Result): Iterable[(String, (Long, String))] = {
-    val row = Bytes.toString(v.getRow)
+    val row = Bytes.toString(v.getRow.drop(2))
     val buf = new ListBuffer[(String, (Long, String))]
     for (c <- v.rawCells()) {
       var dst = Bytes.toString(c.getQualifier)
@@ -72,7 +72,7 @@ object HtoXBatchQuery {
     //点id到点序号对应关系
     //（点id，(点序号,"sn")） 
     // 比如： （AI430851876，（100100001,"sn"））
-    val rddVIdtoSN = rddHBaseWithSN.map[(String, (Long, String))]({ case (sn, v) => (Bytes.toString(v.getRow), (sn, "sn")) })
+    val rddVIdtoSN = rddHBaseWithSN.map[(String, (Long, String))]({ case (sn, v) => (Bytes.toString(v.getRow.drop(2)), (sn, "sn")) })
 
     //-------------------------------------------------
     //点集合
