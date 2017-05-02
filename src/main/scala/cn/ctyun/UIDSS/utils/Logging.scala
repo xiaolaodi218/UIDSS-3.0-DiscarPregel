@@ -123,4 +123,10 @@ trait Logging {
     var  dateFormat:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     dateFormat.format( now )
    } 
+   
+   def getNowDateShort():String={
+    var now:Date = new Date()
+    var  dateFormat:SimpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
+    dateFormat.format( now )
+   } 
   }

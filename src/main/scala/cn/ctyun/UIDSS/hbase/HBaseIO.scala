@@ -86,7 +86,7 @@ object HBaseIO extends Logging {
 //      val cnt= rddToSavePartition.count().toString() 
 //      info(" ******  Writing " + cnt + " rows to HBase ******")
 //      println(" ******  Writing " + cnt + " rows to HBase ******")
-//    }
+//    } 
     
     //多分区并行输出
     rddToSavePartition.foreachPartition {

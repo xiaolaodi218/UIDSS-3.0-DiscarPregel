@@ -20,7 +20,7 @@
 package cn.ctyun.UIDSS
 
 /**
- * UID Server On Spark
+ * UID Service On Spark
  * @author hongjie zhou
  */
 
@@ -42,8 +42,6 @@ object UIDSS extends Logging {
   val APP_PROP_NAME = "user-id-server.properties"; //集群属性文件  
 
   def main(args: Array[String]) {
-
-//    println(Hash.getHashString("WN027"))
     
     if (args.length < 1) {
       println("USAGE: spark-submit [options] <app jar | python file> [app options]".format())
@@ -101,6 +99,7 @@ object UIDSS extends Logging {
           DeleteOldDataCmd.execute(sc, props, oldTime)
         }
       }
+      case "Stat" => Stat.execute(sc, props)
       case _ => info("Not a valid command!")
     }
     

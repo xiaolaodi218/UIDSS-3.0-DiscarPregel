@@ -65,6 +65,20 @@ object GenUIDExtCmd extends Logging {
     }
     bDebugVert
   }  
+
+  def isLargeGroup(group: List[(String, String)]): Iterable[(String, Long)] = {
+
+    val buf = new ListBuffer[(String, Long)]
+
+    //超大节点暂不考虑
+    var groupSize= group.length
+    if (groupSize>100) {
+        val firstElement = group.head._1
+        buf += ((firstElement, groupSize)) 
+    }
+    buf.toIterable
+  }  
+  
   
   
   def execute(sc: SparkContext, props: Properties): Unit = {
@@ -184,6 +198,14 @@ object GenUIDExtCmd extends Logging {
     val rddCnndGroup = rddCnndInId.groupByKey().map { case (v) => v._2.toList }
     //println("rddCnndGroup is:  " +  rddCnndGroup.collect().mkString("\n"))
 
+    //找出超大组
+    val rddLargeGroups = rddCnndGroup.flatMap {
+      case (v) => isLargeGroup(v)
+    }
+    //写入HDFS
+    rddStat.coalesce(1).saveAsTextFile(hdfsPath + "/uiddata/" + "stat-" + getNowDateShort())    
+    //rddLargeGroups.coalesce(1).saveAsTextFile("largegroup-" + getNowDateShort() )      
+    
     /******** 五、UID生成 *******/
     //算出优势UID，如果没有则要生成
     //Output: RDD[(String, List[(String, String)])]   即每个邻接树的所有节点保存为一个List 
