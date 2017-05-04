@@ -47,7 +47,7 @@ import cn.ctyun.UIDSS.uidop.{ GenUID, GenUIDExt }
  */
 object Stat extends Logging {
 
-  def execute(sc: SparkContext, props: Properties) = {
+  def execute(sc: SparkContext, props: Properties, path: String) = {
 
     val hdfsPath = props.getProperty("hdfs")
  
@@ -66,8 +66,8 @@ object Stat extends Logging {
     }
 
     //写入HDFS
-    //rddStat.coalesce(1).saveAsTextFile(hdfsPath + "/uiddata/" + "stat-" + getNowDateShort())    
-    rddStat.coalesce(1).sortByKey().saveAsTextFile("stat-" + getNowDateShort() )    
+    rddStat.coalesce(1).saveAsTextFile(hdfsPath + "/"+ path + "/stat-" + getNowDateShort())    
+    //rddStat.coalesce(1).sortByKey().saveAsTextFile("stat-" + getNowDateShort() )    
 
   }
 

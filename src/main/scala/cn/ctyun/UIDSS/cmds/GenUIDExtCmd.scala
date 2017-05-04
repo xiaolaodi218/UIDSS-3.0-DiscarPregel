@@ -81,8 +81,10 @@ object GenUIDExtCmd extends Logging {
   
   
   
-  def execute(sc: SparkContext, props: Properties): Unit = {
+  def execute(sc: SparkContext, props: Properties, path: String): Unit = {
 
+    val hdfsPath = props.getProperty("hdfs")
+    
     /********  一 、从HBase中取出数据  *******/
 
     //Output:  RDD[(ImmutableBytesWritable, Result)]
@@ -203,7 +205,7 @@ object GenUIDExtCmd extends Logging {
       case (v) => isLargeGroup(v)
     }
     //写入HDFS
-    rddStat.coalesce(1).saveAsTextFile(hdfsPath + "/uiddata/" + "stat-" + getNowDateShort())    
+    rddLargeGroups.coalesce(1).saveAsTextFile(hdfsPath + "/" +path + "/gen-stat-" + getNowDateShort())    
     //rddLargeGroups.coalesce(1).saveAsTextFile("largegroup-" + getNowDateShort() )      
     
     /******** 五、UID生成 *******/

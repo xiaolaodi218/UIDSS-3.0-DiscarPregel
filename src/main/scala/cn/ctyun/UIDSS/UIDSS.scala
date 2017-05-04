@@ -77,7 +77,7 @@ object UIDSS extends Logging {
     cmd match {
       case "BatchQuery"     => BatchQueryCmd.execute(sc, props)
       case "GenerateUID"    => GenUIDCmd.execute(sc, props)
-      case "GenerateUIDExt" => GenUIDExtCmd.execute(sc, props)
+      case "GenerateUIDExt" => GenUIDExtCmd.execute(sc, props, args(1))
       case "LoadRawData" => {
         if (args.length < 3) {
           println("There should be 3 arguments! ")
@@ -99,7 +99,7 @@ object UIDSS extends Logging {
           DeleteOldDataCmd.execute(sc, props, oldTime)
         }
       }
-      case "Stat" => Stat.execute(sc, props)
+      case "Stat" => Stat.execute(sc, props, args(1))
       case _ => info("Not a valid command!")
     }
     

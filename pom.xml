@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.ctyun</groupId>
 	<artifactId>UIDSS</artifactId>
-	<version>0.30</version>
-	<description>User ID Server </description>
+	<version>2.10</version>
+	<description>User ID Server on Spark </description>
 	<inceptionYear>2016</inceptionYear>
 
 	<!-- <repositories> -->
