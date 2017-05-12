@@ -66,7 +66,7 @@ object Stat extends Logging {
     }
 
     //写入HDFS
-    rddStat.coalesce(1).saveAsTextFile(hdfsPath + "/"+ path + "/stat-" + getNowDateShort())    
+    rddStat.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/"+ path + "/stat-" + getNowDateShort())    
     //rddStat.coalesce(1).sortByKey().saveAsTextFile("stat-" + getNowDateShort() )    
 
   }

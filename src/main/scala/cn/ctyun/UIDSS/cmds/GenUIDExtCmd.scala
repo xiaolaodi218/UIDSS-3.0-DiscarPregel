@@ -1,21 +1,23 @@
-/*********************************************************************
- * 
+/**
+ * *******************************************************************
+ *
  * CHINA TELECOM CORPORATION CONFIDENTIAL
  * ______________________________________________________________
- * 
- *  [2015] - [2020] China Telecom Corporation Limited, 
+ *
+ *  [2015] - [2020] China Telecom Corporation Limited,
  *  All Rights Reserved.
- * 
+ *
  * NOTICE:  All information contained herein is, and remains
  * the property of China Telecom Corporation and its suppliers,
- * if any. The intellectual and technical concepts contained 
- * herein are proprietary to China Telecom Corporation and its 
+ * if any. The intellectual and technical concepts contained
+ * herein are proprietary to China Telecom Corporation and its
  * suppliers and may be covered by China and Foreign Patents,
- * patents in process, and are protected by trade secret  or 
- * copyright law. Dissemination of this information or 
- * reproduction of this material is strictly forbidden unless prior 
+ * patents in process, and are protected by trade secret  or
+ * copyright law. Dissemination of this information or
+ * reproduction of this material is strictly forbidden unless prior
  * written permission is obtained from China Telecom Corporation.
- **********************************************************************/
+ * ********************************************************************
+ */
 package cn.ctyun.UIDSS.cmds
 
 import java.util.Properties
@@ -54,6 +56,8 @@ import cn.ctyun.UIDSS.uidop.{ GenUID, GenUIDExt }
  */
 object GenUIDExtCmd extends Logging {
 
+  var iLargeGroup = 300
+
   def isDebugVert(vert: String): Boolean = {
     var bDebugVert = false
     if ("QQ974834277".compareTo(vert) == 0
@@ -64,27 +68,32 @@ object GenUIDExtCmd extends Logging {
       bDebugVert = true
     }
     bDebugVert
-  }  
+  }
 
   def isLargeGroup(group: List[(String, String)]): Iterable[(String, Long)] = {
 
     val buf = new ListBuffer[(String, Long)]
 
     //超大节点暂不考虑
-    var groupSize= group.length
-    if (groupSize>100) {
-        val firstElement = group.head._1
-        buf += ((firstElement, groupSize)) 
+    var groupSize = group.length
+    if (groupSize > iLargeGroup) {
+      val firstElement = group.head._1
+      buf += ((firstElement, groupSize))
     }
     buf.toIterable
-  }  
-  
-  
-  
+  }
+
   def execute(sc: SparkContext, props: Properties, path: String): Unit = {
 
     val hdfsPath = props.getProperty("hdfs")
-    
+
+    val recordLargeGroup = props.getProperty("recordLargeGroup")
+
+    val largeGroup = props.getProperty("largeGroupSize")
+    if (largeGroup != null && largeGroup.length() > 0 && largeGroup.toInt > 0) {
+      iLargeGroup = largeGroup.toInt
+    }
+
     /********  一 、从HBase中取出数据  *******/
 
     //Output:  RDD[(ImmutableBytesWritable, Result)]
@@ -108,13 +117,13 @@ object GenUIDExtCmd extends Logging {
         println("Partition  " + ind + " has  total sn of " + sn)
         lst
       }
-    
+
     //再分区提高并行度
     val partitionNum = props.getProperty("rddPartitions").toInt
     val rdd = rddHBaseWithSN.repartition(partitionNum)
     rddHbase.unpersist(true)
     //HBase分片大小并不均匀, 强制先进行repartition工作,避免与之后阶段工作一起进行,单个单个节点负载过重.
-    val cnt= rdd.count().toString() 
+    val cnt = rdd.count().toString()
     info(" ******  Read " + cnt + " rows from HBase ******")
     println(" ******  Read " + cnt + " rows from HBase ******")
 
@@ -150,7 +159,7 @@ object GenUIDExtCmd extends Logging {
     //  typ: 节点类型；temp: Long 记录了树中节点的最小序号  
     //  Edge (src: Long, dst: Long, prop: (typ: String , weight: Int) )
     //  typ: 连接类型；weight: Int 连接权重  
-    
+
     //PregelGenUID.setVidDebug(vidDebug.value) //传点序号
     val searchDepth = props.getProperty("searchDepth").toInt
     info(getNowDate() + " ******  search depth is " + searchDepth + "  *******")
@@ -200,14 +209,16 @@ object GenUIDExtCmd extends Logging {
     val rddCnndGroup = rddCnndInId.groupByKey().map { case (v) => v._2.toList }
     //println("rddCnndGroup is:  " +  rddCnndGroup.collect().mkString("\n"))
 
-    //找出超大组
-    val rddLargeGroups = rddCnndGroup.flatMap {
-      case (v) => isLargeGroup(v)
+    if (recordLargeGroup != null && recordLargeGroup.length() > 0 && recordLargeGroup.toInt > 0) {
+      //找出超大组
+      val rddLargeGroups = rddCnndGroup.flatMap {
+        case (v) => isLargeGroup(v)
+      }
+      //写入HDFS
+      rddLargeGroups.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/" + path + "/gen-stat-" + getNowDateShort())
+      //rddLargeGroups.coalesce(1).saveAsTextFile("largegroup-" + getNowDateShort() )      
     }
-    //写入HDFS
-    rddLargeGroups.coalesce(1).saveAsTextFile(hdfsPath + "/" +path + "/gen-stat-" + getNowDateShort())    
-    //rddLargeGroups.coalesce(1).saveAsTextFile("largegroup-" + getNowDateShort() )      
-    
+
     /******** 五、UID生成 *******/
     //算出优势UID，如果没有则要生成
     //Output: RDD[(String, List[(String, String)])]   即每个邻接树的所有节点保存为一个List 
