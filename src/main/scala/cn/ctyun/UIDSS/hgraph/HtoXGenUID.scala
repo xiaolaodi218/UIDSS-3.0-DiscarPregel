@@ -1,21 +1,23 @@
-/*********************************************************************
- * 
+/**
+ * *******************************************************************
+ *
  * CHINA TELECOM CORPORATION CONFIDENTIAL
  * ______________________________________________________________
- * 
- *  [2015] - [2020] China Telecom Corporation Limited, 
+ *
+ *  [2015] - [2020] China Telecom Corporation Limited,
  *  All Rights Reserved.
- * 
+ *
  * NOTICE:  All information contained herein is, and remains
  * the property of China Telecom Corporation and its suppliers,
- * if any. The intellectual and technical concepts contained 
- * herein are proprietary to China Telecom Corporation and its 
+ * if any. The intellectual and technical concepts contained
+ * herein are proprietary to China Telecom Corporation and its
  * suppliers and may be covered by China and Foreign Patents,
- * patents in process, and are protected by trade secret  or 
- * copyright law. Dissemination of this information or 
- * reproduction of this material is strictly forbidden unless prior 
+ * patents in process, and are protected by trade secret  or
+ * copyright law. Dissemination of this information or
+ * reproduction of this material is strictly forbidden unless prior
  * written permission is obtained from China Telecom Corporation.
- **********************************************************************/
+ * ********************************************************************
+ */
 package cn.ctyun.UIDSS.hgraph
 
 import org.apache.spark.rdd.RDD
@@ -58,7 +60,7 @@ object HtoXGenUID extends Logging {
       0
     }
   }
-  
+
   private var printCount_1 = 1
   def getPrintCount_1() = {
     if (printCount_1 > 0) {
@@ -68,7 +70,7 @@ object HtoXGenUID extends Logging {
       0
     }
   }
-  
+
   var rddVidtoLinks: RDD[(Long, (String, String))] = null
 
   def isDebugVert(vert: String): Boolean = {
@@ -97,7 +99,7 @@ object HtoXGenUID extends Logging {
       case HGraphUtil.STR_ACCS_NUM => { if (iNeighbors > 20) bNeedProcess = false }
       // UID 最多拥有200个号        
       case HGraphUtil.STR_UD       => { if (iNeighbors > 200) bNeedProcess = false }
-      case _    => { bNeedProcess = false }
+      case _                       => { bNeedProcess = false }
     }
     bNeedProcess
   }
@@ -155,10 +157,10 @@ object HtoXGenUID extends Logging {
         }
         if (value > 0) {
           if (needPrint) {
-           buf += ((dst, (sn, ty+row+";"+dst))) 
-          }else {
-           buf += ((dst, (sn, ty))) 
-          }          
+            buf += ((dst, (sn, ty + row + ";" + dst)))
+          } else {
+            buf += ((dst, (sn, ty)))
+          }
         }
       }
     }
@@ -177,26 +179,26 @@ object HtoXGenUID extends Logging {
     //-------------------------------------------------
     //点序号
     //-------------------------------------------------
-//    //生成序号
-//    //为每个起始点加序列号sn，也就是HBase分区序号*每分区最大行数 + 该分区内的行序号。
-//    //比如： （100100001, {AI430851876/v:$1AN06F6642CE07804C26B847BEAEEB0204A/1458733523410/Put/vlen=4/mvcc=0} ) 
-//    info(" ****** 点序号  ******")
-//    val rddHBaseWithSN = rdd
-//      .mapPartitionsWithIndex { (ind, vs) =>
-//        var sn = GraphXUtil.MAX_VERTICE + ind * GraphXUtil.MAX_VERTICE_PER_PARTITION
-//        val lst = vs.map {
-//          case (_, v) =>
-//            sn = sn + 1
-//            val row = Bytes.toString(v.getRow.drop(2))
-//            if (isDebugVert(row)) {  println(row + "  is assigned sn of " + sn + " in partition " + ind) }
-//            (sn, v)
-//        }
-//        println("Partition  " + ind + " has  total sn of " + sn)
-//        lst
-//      }
+    //    //生成序号
+    //    //为每个起始点加序列号sn，也就是HBase分区序号*每分区最大行数 + 该分区内的行序号。
+    //    //比如： （100100001, {AI430851876/v:$1AN06F6642CE07804C26B847BEAEEB0204A/1458733523410/Put/vlen=4/mvcc=0} ) 
+    //    info(" ****** 点序号  ******")
+    //    val rddHBaseWithSN = rdd
+    //      .mapPartitionsWithIndex { (ind, vs) =>
+    //        var sn = GraphXUtil.MAX_VERTICE + ind * GraphXUtil.MAX_VERTICE_PER_PARTITION
+    //        val lst = vs.map {
+    //          case (_, v) =>
+    //            sn = sn + 1
+    //            val row = Bytes.toString(v.getRow.drop(2))
+    //            if (isDebugVert(row)) {  println(row + "  is assigned sn of " + sn + " in partition " + ind) }
+    //            (sn, v)
+    //        }
+    //        println("Partition  " + ind + " has  total sn of " + sn)
+    //        lst
+    //      }
 
-   //println("rddHBaseWithSN  has  " + rddHBaseWithSN.count() + " rows") 
-    
+    //println("rddHBaseWithSN  has  " + rddHBaseWithSN.count() + " rows") 
+
     info(" ****** 点序号: 生成序号   ******")
     //点id到点序号对应关系
     //（点id，(点序号,"sn")） 
@@ -206,8 +208,8 @@ object HtoXGenUID extends Logging {
       case (sn, v) =>
         val id = Bytes.toString(v.getRow.drop(2))
         if (HtoXGenUID.getPrintCount() > 0) {
-          println("**************************id is " + id +"\n")
-          println("**************************sn is " + sn +"\n")
+          println("**************************id is " + id + "\n")
+          println("**************************sn is " + sn + "\n")
         }
         //if (isDebugVert(id)) {  println(id + "  is assigned sn of " + sn) }
         (id, (sn, id.substring(0, 2)))
@@ -264,11 +266,11 @@ object HtoXGenUID extends Logging {
     //(终止点id, (起始点序号，边属性）)
     //比如：(AI430851876, (100100001，"$1"))
     //val rddDstIdSrcVId = rddHBaseWithSN.flatMap[(String, (Long, String))] {
-    val rddDstIdSrcVId = rddHBaseWithSN.flatMap {  
+    val rddDstIdSrcVId = rddHBaseWithSN.flatMap {
       case (sn, v) =>
         if (HtoXGenUID.getPrintCount_1() > 0) {
-          println("**************************sn is " + sn +"\n")
-          println("**************************v is " + v +"\n")
+          println("**************************sn is " + sn + "\n")
+          println("**************************v is " + v + "\n")
         }
         mapToEdges(sn, v)
     }
@@ -276,6 +278,14 @@ object HtoXGenUID extends Logging {
     //  case (dst, (sn, typ)) =>
     //    println("Dst node id is: " + dst + ";  source node serial number is: " + sn + "; link type is:  " + typ)
     //}
+
+//    val sampledWordCounts = rddDstIdSrcVId.countByKey()
+//    sampledWordCounts.foreach {
+//      case (sn, v) =>
+//        if (v > 100) {
+//          println("**************************sn is " + sn + " v is " + v + "\n")
+//        }
+//    }
 
     info(" ****** 边集合:  第2步 ******")
     //边集合第2步 - 通过join实现终点id与序号对应
@@ -296,7 +306,7 @@ object HtoXGenUID extends Logging {
     //   Edge ((src: VertexId, dst: VertexId),  (typ: String , weight: Int) )
     val rddDirectedEdge = rddJoinByDstId.map {
       case (dstId, ((srcVId, edgeTyp), (dstVid, nodeTyp))) => {
-        if (edgeTyp.length()>2) {println("Directed Edge:  (" + srcVId +" , "+ dstVid + "); Edgetype is  "+ edgeTyp +"; Dst Id is"+dstId)}
+        if (edgeTyp.length() > 2) { println("Directed Edge:  (" + srcVId + " , " + dstVid + "); Edgetype is  " + edgeTyp + "; Dst Id is" + dstId) }
         if (srcVId > dstVid) {
           ((dstVid, srcVId), (edgeTyp, 1))
         } else {
@@ -308,29 +318,28 @@ object HtoXGenUID extends Logging {
 
     val rddUnDirectedEdge = rddDirectedEdge.reduceByKey {
       case ((typ1, weight1), (typ2, weight2)) => {
-        if (typ1.length()>2 || typ2.length()>2) {println("Before reduce Type 1 is " + typ1 +", weight 1 is "+ weight1 +", type 2 is " + typ2 +", weight 2 is "+ weight2 )}
+        if (typ1.length() > 2 || typ2.length() > 2) { println("Before reduce Type 1 is " + typ1 + ", weight 1 is " + weight1 + ", type 2 is " + typ2 + ", weight 2 is " + weight2) }
         (typ1, weight1 + weight2) //为了过滤,双向都有才保留
       }
     }
     //println("rddUnDirectedEdge " + rddUnDirectedEdge.collect().mkString("\n"))
-    
+
     val rddEdge = rddUnDirectedEdge.flatMap {
       case (((sn1, sn2), (typ, weight))) => {
         val buf = new ListBuffer[Edge[(String, Int)]]
         //为了过滤,双向都有才保留
         if (weight > 1) {
-          if (typ.length()>2) {println("Undirected edge (" + sn1 +"," + sn2 + "," + typ+ "," + weight + ")")}          
+          if (typ.length() > 2) { println("Undirected edge (" + sn1 + "," + sn2 + "," + typ + "," + weight + ")") }
           buf += Edge(sn1, sn2, (typ, 1))
         }
         buf.toIterable
       }
-    }    
+    }
     //println("rddEdge " + rddEdge.collect().mkString("\n"))
- 
-    
+
     //-------------------------------------------------
     //生成图
     //-------------------------------------------------
-    Graph(rddVertex, rddEdge, null)
+    Graph(rddVertex, rddEdge, null, StorageLevel.MEMORY_AND_DISK, StorageLevel.MEMORY_AND_DISK)
   }
 }
