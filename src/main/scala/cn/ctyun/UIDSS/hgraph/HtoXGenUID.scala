@@ -112,7 +112,7 @@ object HtoXGenUID extends Logging {
 
     //超大节点暂不考虑
     val iNeighbors = v.rawCells().size
-    if (true) {
+    if (isVertNeedProcessing(row, iNeighbors)) {
       for (c <- v.rawCells()) {
         var dst = Bytes.toString(c.getQualifier)
         dst = dst.substring(2)
@@ -253,7 +253,14 @@ object HtoXGenUID extends Logging {
     //为以后计算邻接点, 先保留下
     rddVidtoLinks = rddHBaseWithSN.map[(Long, (String, String))] {
       case (sn, v) => convertToLinks(sn, v)
-    }.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    }
+//    val sampledWordCounts = rddVidtoLinks.countByKey()
+//    sampledWordCounts.foreach {
+//      case (sn, v) =>
+//        if (v > 100) {
+//          println("***rddVidtoLinks large key is " + sn + "; v is " + v + "\n")
+//        }
+//    }
     //println("rddSnAndLinks " + rddSnAndLinks.collect().mkString("\n"))
 
     //-------------------------------------------------

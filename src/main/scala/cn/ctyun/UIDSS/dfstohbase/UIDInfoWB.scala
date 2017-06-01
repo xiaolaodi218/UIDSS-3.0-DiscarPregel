@@ -34,7 +34,7 @@ object UIDInfoWB extends Logging{
     weight = order
     val result = textFile.flatMap(convert(_,lant_id))
     //println(result.collect().mkString("\n"))
-    info("UIDSS: UIDInfoWB processed " + count + " lines.")
+    //info("UIDSS: UIDInfoWB processed " + count + " lines.")
     result
   }
     

@@ -35,7 +35,7 @@ object UIDInfoMBL extends Logging{
 
     val result = textFile.flatMap(convert(_,lant_id))
     //println(result.collect().mkString("\n"))
-    info("UIDInfoMBL processed " + count + " lines.")
+    //info("UIDInfoMBL processed " + count + " lines.")
     result
   }
     

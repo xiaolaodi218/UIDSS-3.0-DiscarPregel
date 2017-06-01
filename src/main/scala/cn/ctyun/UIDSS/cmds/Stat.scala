@@ -47,10 +47,16 @@ import cn.ctyun.UIDSS.uidop.{ GenUID, GenUIDExt }
  */
 object Stat extends Logging {
 
+  var iLargeNode = 1000
+
   def execute(sc: SparkContext, props: Properties, path: String) = {
 
     val hdfsPath = props.getProperty("hdfs")
- 
+    val largeNode = props.getProperty("largeNodeSize")
+    if (largeNode != null && largeNode.length() > 0 && largeNode.toInt > 0) {
+      iLargeNode = largeNode.toInt
+    }
+    
     //从HBase中取出数据
     info(getNowDate() + " ******  Loading  rows from HBase ******")
     val rddHbase = HBaseIO.getGraphTableRDD(sc, props)
@@ -59,15 +65,31 @@ object Stat extends Logging {
     val rddCount = rddHbase.map {
       case (_, v) => mapToCount(v)
     }
-
     //所有节点,按类型汇总
     val rddStat = rddCount.reduceByKey {
       case (x, y) => x + y
     }
-
     //写入HDFS
-    rddStat.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/"+ path + "/stat-" + getNowDateShort())    
+    rddStat.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/" + path + "/stat-" + getNowDateShort())
     //rddStat.coalesce(1).sortByKey().saveAsTextFile("stat-" + getNowDateShort() )    
+
+    //每个节点,算出总计数
+    val rddCountAll = rddHbase.map {
+      case (_, v) => mapToCountA(v)
+    }
+    //所有节点,按类型汇总
+    val rddStatAll = rddCountAll.reduceByKey {
+      case (x, y) => x + y
+    }
+    //写入HDFS
+    rddStatAll.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/" + path + "/stat-all-" + getNowDateShort())
+
+    //
+    val rddLargeNodes = rddHbase.flatMap {
+      case (_,v) => isLargeNode(v)
+    }
+    //写入HDFS
+    rddLargeNodes.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/" + path + "/stat-large-node-" + getNowDateShort())
 
   }
 
@@ -98,15 +120,35 @@ object Stat extends Logging {
         case _    =>
       }
     }
-      
-    val strCountUD = (100 + countUD%100).toString().substring(1, 3)
-    val strCountMN = (100 + countMN%100).toString().substring(1, 3)
-    val strCountWN = (100 + countWN%100).toString().substring(1, 3)
-    val strCountAN = (100 + countAN%100).toString().substring(1, 3)
-    val strCountQQ = (100 + countQQ%100).toString().substring(1, 3)
+
+    val strCountUD = (100 + countUD % 100).toString().substring(1, 3)
+    val strCountMN = (100 + countMN % 100).toString().substring(1, 3)
+    val strCountWN = (100 + countWN % 100).toString().substring(1, 3)
+    val strCountAN = (100 + countAN % 100).toString().substring(1, 3)
+    val strCountQQ = (100 + countQQ % 100).toString().substring(1, 3)
 
     var key = ty + strCountUD + strCountMN + strCountWN + strCountAN + strCountQQ
 
     (key, 1)
+  }
+
+  def mapToCountA(v: Result) = {
+    //节点类型
+    val ty = (Bytes.toString(v.getRow.drop(2))).substring(0, 2)
+    //所有边按类型计数
+    val key = ty + v.rawCells().size.toString()
+    (key, 1)
+  }
+
+  def isLargeNode(v: Result): Iterable[(String, Long)] = {
+
+    val buf = new ListBuffer[(String, Long)]
+
+    //超大节点暂不考虑
+    val nodeSize = v.rawCells().size
+    if (nodeSize > iLargeNode) {
+      buf += ((Bytes.toString(v.getRow),nodeSize))
+    }
+    buf.toIterable
   }
 }

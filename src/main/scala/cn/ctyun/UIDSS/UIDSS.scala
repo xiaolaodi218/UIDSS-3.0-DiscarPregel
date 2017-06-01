@@ -80,8 +80,8 @@ object UIDSS extends Logging {
       case "GenerateUIDExt" => GenUIDExtCmd.execute(sc, props, args(1))
       case "LoadRawData" => {
         if (args.length < 3) {
-          println("There should be 3 arguments! ")
-          info("There should be 3 arguments! ")
+          println("There should be at least 3 arguments! ")
+          info("There should be at least 3 arguments! ")
         } else {
           if (args.length > 4) {
             LoadRawDataCmd.execute(sc, props, args(1), args(2), args(3), args(4))

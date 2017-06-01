@@ -56,7 +56,7 @@ import cn.ctyun.UIDSS.uidop.{ GenUID, GenUIDExt }
  */
 object GenUIDExtCmd extends Logging {
 
-  var iLargeGroup = 300
+  var iLargeGroup = 3000
 
   def isDebugVert(vert: String): Boolean = {
     var bDebugVert = false
