@@ -131,7 +131,8 @@ object HBaseIO extends Logging {
 
         var rowCount = 0 
         
-        for (row <- rows.toArray) (
+//        for (row <- rows.toArray) (
+        for (row <- rows) (
           {
             //row  ((行，列)，值）) 
             var src: String =  Hash.getHashString(row._1._1) + row._1._1 

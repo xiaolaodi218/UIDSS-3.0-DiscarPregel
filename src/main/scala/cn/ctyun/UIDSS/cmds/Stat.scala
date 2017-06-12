@@ -84,12 +84,12 @@ object Stat extends Logging {
     //写入HDFS
     rddStatAll.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/" + path + "/stat-all-" + getNowDateShort())
 
-    //
-    val rddLargeNodes = rddHbase.flatMap {
-      case (_,v) => isLargeNode(v)
-    }
-    //写入HDFS
-    rddLargeNodes.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/" + path + "/stat-large-node-" + getNowDateShort())
+    //列出所有大节点
+//    val rddLargeNodes = rddHbase.flatMap {
+//      case (_,v) => isLargeNode(v)
+//    }
+//    //写入HDFS
+//    rddLargeNodes.coalesce(1).sortByKey().saveAsTextFile(hdfsPath + "/" + path + "/stat-large-node-" + getNowDateShort())
 
   }
 
@@ -121,11 +121,11 @@ object Stat extends Logging {
       }
     }
 
-    val strCountUD = (100 + countUD % 100).toString().substring(1, 3)
-    val strCountMN = (100 + countMN % 100).toString().substring(1, 3)
-    val strCountWN = (100 + countWN % 100).toString().substring(1, 3)
-    val strCountAN = (100 + countAN % 100).toString().substring(1, 3)
-    val strCountQQ = (100 + countQQ % 100).toString().substring(1, 3)
+    val strCountUD = if (countUD>99) "99" else (100 + countUD % 100).toString().substring(1, 3)
+    val strCountMN =if (countMN>99) "99" else (100 + countMN % 100).toString().substring(1, 3)
+    val strCountWN =if (countWN>99) "99" else (100 + countWN % 100).toString().substring(1, 3)
+    val strCountAN = if (countAN>99) "99" else (100 + countAN % 100).toString().substring(1, 3)
+    val strCountQQ = if (countQQ>99) "99" else (100 + countQQ % 100).toString().substring(1, 3)
 
     var key = ty + strCountUD + strCountMN + strCountWN + strCountAN + strCountQQ
 
@@ -136,7 +136,9 @@ object Stat extends Logging {
     //节点类型
     val ty = (Bytes.toString(v.getRow.drop(2))).substring(0, 2)
     //所有边按类型计数
-    val key = ty + v.rawCells().size.toString()
+    val iNeighbors = v.rawCells().size
+    val count = if (iNeighbors>99)  (iNeighbors/100)*100 else iNeighbors
+    val key = ty + count.toString()
     (key, 1)
   }
 

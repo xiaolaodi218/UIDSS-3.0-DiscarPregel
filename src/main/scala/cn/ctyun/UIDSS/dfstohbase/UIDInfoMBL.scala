@@ -129,8 +129,8 @@ object UIDInfoMBL extends Logging{
         
         // 添加ACCT_ID与手机号关系
         if (null != ACCT_ID && ACCT_ID.length() > 5 && ACCT_ID.length() < 100 ) { 
-          buf += (((HGraphUtil.STR_MBL_NUM + MBL_NBR,  HGraphUtil.STR_TABLE_UID_INFO_MBL + HGraphUtil.STR_ACCT_ID + ACCT_ID), weight))
-          buf += (((HGraphUtil.STR_ACCT_ID + ACCT_ID,  HGraphUtil.STR_TABLE_UID_INFO_MBL + HGraphUtil.STR_MBL_NUM + MBL_NBR), weight))
+          buf += (((HGraphUtil.STR_MBL_NUM + MBL_NBR,  HGraphUtil.STR_TABLE_UID_INFO_MBL + HGraphUtil.STR_ACCT_ID + LANT_ID + ACCT_ID), weight))
+          buf += (((HGraphUtil.STR_ACCT_ID+ LANT_ID + ACCT_ID,  HGraphUtil.STR_TABLE_UID_INFO_MBL + HGraphUtil.STR_MBL_NUM + MBL_NBR), weight))
         }
         
         // 添加ICCID与手机号关系

@@ -120,8 +120,8 @@ object UIDInfoTEL extends Logging {
 
         // 添加ACCT_ID与手机号关系
         if (null != ACCT_ID && ACCT_ID.length() > 5 && ACCT_ID.length() < 100) {
-          buf += (((HGraphUtil.STR_ACCS_NUM + ACCS_NBR, HGraphUtil.STR_TABLE_UID_INFO_TEL + HGraphUtil.STR_ACCT_ID + ACCT_ID), weight))
-          buf += (((HGraphUtil.STR_ACCT_ID + ACCT_ID, HGraphUtil.STR_TABLE_UID_INFO_TEL + HGraphUtil.STR_ACCS_NUM + ACCS_NBR), weight))
+          buf += (((HGraphUtil.STR_ACCS_NUM + ACCS_NBR, HGraphUtil.STR_TABLE_UID_INFO_TEL + HGraphUtil.STR_ACCT_ID+ LANT_ID + ACCT_ID), weight))
+          buf += (((HGraphUtil.STR_ACCT_ID+ LANT_ID + ACCT_ID, HGraphUtil.STR_TABLE_UID_INFO_TEL + HGraphUtil.STR_ACCS_NUM + ACCS_NBR), weight))
         }
         count += 1
       }
