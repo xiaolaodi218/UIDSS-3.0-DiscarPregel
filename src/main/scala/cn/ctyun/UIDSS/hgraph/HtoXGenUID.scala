@@ -104,6 +104,85 @@ object HtoXGenUID extends Logging {
     bNeedProcess
   }
 
+  def isEdgeNeedProcessing(row: String, dstType: String): Boolean = {
+    var bNeedProcess = false
+    row.substring(0, 2) match {
+      case HGraphUtil.STR_CUST_ID => {
+        dstType match {
+          case HGraphUtil.STR_ACCS_NUM => bNeedProcess = true
+          case HGraphUtil.STR_MBL_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_WB_NUM   => bNeedProcess = true
+          case _                       => bNeedProcess = false
+        }
+      }
+      case HGraphUtil.STR_ID_NUM => {
+        dstType match {
+          case HGraphUtil.STR_ACCS_NUM => bNeedProcess = true
+          case HGraphUtil.STR_MBL_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_WB_NUM   => bNeedProcess = true
+          case _                       => bNeedProcess = false
+        }
+      }
+      case HGraphUtil.STR_QQ => {
+        dstType match {
+          case HGraphUtil.STR_MBL_NUM => bNeedProcess = true
+          case HGraphUtil.STR_WB_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_UD      => bNeedProcess = true
+          case _                      => bNeedProcess = false
+        }
+      }
+      //手机号关联
+      case HGraphUtil.STR_MBL_NUM => {
+        dstType match {
+          case HGraphUtil.STR_QQ      => bNeedProcess = true
+          case HGraphUtil.STR_CUST_ID => bNeedProcess = true
+          case HGraphUtil.STR_ID_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_IMSI    => bNeedProcess = true
+          case HGraphUtil.STR_UD      => bNeedProcess = true
+          case _                      => bNeedProcess = false
+        }
+      }
+      //宽带号关联
+      case HGraphUtil.STR_WB_NUM => {
+        dstType match {
+          case HGraphUtil.STR_QQ      => bNeedProcess = true
+          case HGraphUtil.STR_CUST_ID => bNeedProcess = true
+          case HGraphUtil.STR_ID_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_UD      => bNeedProcess = true
+          case _                      => bNeedProcess = false
+        }
+      }
+      //固话号 
+      case HGraphUtil.STR_ACCS_NUM => {
+        dstType match {
+          case HGraphUtil.STR_CUST_ID => bNeedProcess = true
+          case HGraphUtil.STR_ID_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_UD      => bNeedProcess = true
+          case _                      => bNeedProcess = false
+        }
+      }
+      // UID        
+      case HGraphUtil.STR_UD => {
+        dstType match {
+          case HGraphUtil.STR_ACCS_NUM => bNeedProcess = true
+          case HGraphUtil.STR_WB_NUM   => bNeedProcess = true
+          case HGraphUtil.STR_MBL_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_QQ       => bNeedProcess = true
+          case _                       => bNeedProcess = false
+        }
+      }
+      //sim卡
+      case HGraphUtil.STR_IMSI => {
+        dstType match {
+          case HGraphUtil.STR_MBL_NUM => bNeedProcess = true
+          case _                      => bNeedProcess = false
+        }
+      }
+      case _ => { bNeedProcess = false }
+    }
+    bNeedProcess
+  }
+
   //保存到邻接列表以后用
   //把HBase一行, 就是一个点的所有邻居   ( 1000001234567 , "AN12345,MN678910,...")
   def convertToLinks(sn: Long, v: Result): (Long, (String, String)) = {
@@ -116,18 +195,24 @@ object HtoXGenUID extends Logging {
       for (c <- v.rawCells()) {
         var dst = Bytes.toString(c.getQualifier)
         dst = dst.substring(2)
-        var value = 0
-        try {
-          value = Bytes.toInt(c.getValue)
-        } catch {
-          case _: Throwable =>
-        }
-        if (value > 0)
-          if (links.length() > 0) {
-            links = links + ";" + dst
-          } else {
-            links = dst
+        val nodeTy = dst.substring(0, 2)
+        //只计算与UID生成有关节点
+        if (isEdgeNeedProcessing(row, nodeTy)) {
+          
+          var value = 0
+          try {
+            value = Bytes.toInt(c.getValue)
+          } catch {
+            case _: Throwable =>
           }
+          if (value > 0) {
+            if (links.length() > 0) {
+              links = links + ";" + dst
+            } else {
+              links = dst
+            }
+          }
+        }
       }
     }
     (sn, (row, links))
@@ -148,18 +233,21 @@ object HtoXGenUID extends Logging {
         var dst = Bytes.toString(c.getQualifier)
         val ty = dst.substring(0, 2)
         dst = dst.substring(2)
-        //if (isDebugVert(dst)) { needPrint = true }
-        var value = 0
-        try {
-          value = Bytes.toInt(c.getValue)
-        } catch {
-          case _: Throwable =>
-        }
-        if (value > 0) {
-          if (needPrint) {
-            buf += ((dst, (sn, ty + row + ";" + dst)))
-          } else {
-            buf += ((dst, (sn, ty)))
+        val nodeTy = dst.substring(0, 2)
+        if (isEdgeNeedProcessing(row, nodeTy)) {
+          //if (isDebugVert(dst)) { needPrint = true }
+          var value = 0
+          try {
+            value = Bytes.toInt(c.getValue)
+          } catch {
+            case _: Throwable =>
+          }
+          if (value > 0) {
+            if (needPrint) {
+              buf += ((dst, (sn, ty + row + ";" + dst)))
+            } else {
+              buf += ((dst, (sn, ty)))
+            }
           }
         }
       }
@@ -336,7 +424,8 @@ object HtoXGenUID extends Logging {
         val buf = new ListBuffer[Edge[(String, Int)]]
         //为了过滤,双向都有才保留
         if (weight > 1) {
-          if (typ.length() > 2) { println("Undirected edge (" + sn1 + "," + sn2 + "," + typ + "," + weight + ")") }
+          //调试用
+          if (typ.length() > 2) { println("Undirected edge (" + sn1 + "," + sn2 + "," + typ + "," + weight + ")") }          
           buf += Edge(sn1, sn2, (typ, 1))
         }
         buf.toIterable

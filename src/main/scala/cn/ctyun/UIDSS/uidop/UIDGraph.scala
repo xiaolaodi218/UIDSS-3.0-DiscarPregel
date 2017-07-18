@@ -374,7 +374,7 @@ class UIDGraph(group: List[(String, String)]) {
     val lnks = g.getOrElse(vSrc, Set[String]())
     for (vNeighbor <- lnks) {
       val typ = vNeighbor.substring(0, 2)
-      if (typ.compareToIgnoreCase(HGraphUtil.STR_QQ) == 0) {
+      if (typ.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
         iMobileNeighbors += 1
       }
     }

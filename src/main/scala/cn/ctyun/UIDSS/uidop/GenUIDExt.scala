@@ -54,7 +54,7 @@ object GenUIDExt extends Logging{
     val uidGraph = UIDGraph(group)
 
     if (uidGraph.getSize() > 0) {
-      if (uidGraph.getSize() > 300) {
+      if (uidGraph.getSize() > 1000) {
          println(getNowDate() + " ****** get graph has " +  uidGraph.getSize()  +" nodes. Bigest nodes is " + uidGraph.getBigestNode()  +"  ****** "  )   
          ListBuffer[(String, List[(String, String)])]()
       }
