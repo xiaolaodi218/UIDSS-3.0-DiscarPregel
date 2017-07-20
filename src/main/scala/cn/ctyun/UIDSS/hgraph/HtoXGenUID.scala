@@ -263,7 +263,7 @@ object HtoXGenUID extends Logging {
 
   //Graph[点 (String 点类型, Long 根节点序号),  边(String 边类型, Int 权重)] 
   //def getGraphRDD(rdd: RDD[(ImmutableBytesWritable, Result)], sc: SparkContext): Graph[(String, Long), (String, Int)] = {
-  def getGraphRDD(rddHBaseWithSN: RDD[(Long, Result)], sc: SparkContext): Graph[(String, Long), (String, Int)] = {
+  def getGraphRDD(rddHBaseWithSN: RDD[(Long, Result)], sc: SparkContext): Graph[(String, (Long, List[(Long, Long)])), (String, Int)] = {
     //-------------------------------------------------
     //点序号
     //-------------------------------------------------
@@ -315,11 +315,12 @@ object HtoXGenUID extends Logging {
     info(" ****** 点集合   ******")
     val rddVertex = rddIdtoVId.map {
       case (id, (sn, _)) => {
+        val neighbors : List[(Long, Long)]= List()
         //if (isDebugVert(id)) {
         if (false) {
-          (sn, (id, 0L))
+          (sn, (id, (0L, neighbors)))
         } else {
-          (sn, (id.substring(0, 2), 0L))
+          (sn, (id.substring(0, 2), (0L,neighbors)))
         }
       }
     }

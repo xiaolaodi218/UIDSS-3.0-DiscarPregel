@@ -40,7 +40,6 @@ import cn.ctyun.UIDSS.utils.{ Utils, Logging }
  */
 object GenUIDExt extends Logging{
 
-  val initialMsg = GraphXUtil.MAX_VERTICE
   var UID_PRIOR_QQ = 2
   var UID_PRIOR_ID = 1
   var UID_PRIOR_CI = 1

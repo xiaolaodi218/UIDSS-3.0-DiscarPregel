@@ -24,7 +24,7 @@ import cn.ctyun.UIDSS.hgraph._
 
 object PregelBatchQuery {
 
-  val initialMsg = GraphXUtil.MAX_VERTICE
+  val initialMsg = 2*GraphXUtil.MAX_VERTICE
   //triplet: EdgeTriplet[VD, ED]
   def sendMsg(triplet: EdgeTriplet[(String, Long), (String, Long)]): Iterator[(VertexId, Long)] = {
 

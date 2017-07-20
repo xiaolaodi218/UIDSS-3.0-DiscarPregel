@@ -184,7 +184,23 @@ object GenUIDExtCmd extends Logging {
     // (vid:Long, (typ: String, cvid:Long))
     //output: 
     // (vid:Long, ((id: String, links: String),(typ: String, cvid:Long) ) ) 
-    val rddLinksJoinVerts = HtoXGenUID.rddVidtoLinks.join(graphCnnd.vertices)
+    
+    // vert:   (VertexId,(String, (Long, List[(Long, Long)])))
+    val rddVerticesExt = graphCnnd.vertices.flatMap { vert =>
+      {
+        var verts = new ListBuffer[(Long, (String, Long))]
+        val neighbors = vert._2._2._2
+        if (neighbors.length == 0) {
+          verts += ((vert._1, (vert._2._1, vert._2._2._1)))
+        } 
+        else { //需要扩展的节点,比如宽带节点
+          for (neighbor <- neighbors) { verts += ((vert._1, (vert._2._1, neighbor._2))) }
+        }
+        verts.toIterable
+      }
+    }
+    
+    val rddLinksJoinVerts = HtoXGenUID.rddVidtoLinks.join(rddVerticesExt)
     //println("rddLinksJoinVerts " + rddLinksJoinVerts.collect().mkString("\n")) 
 
     //转为以最小序号为key的二元组

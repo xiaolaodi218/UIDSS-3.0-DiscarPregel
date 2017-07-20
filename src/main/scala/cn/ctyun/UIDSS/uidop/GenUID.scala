@@ -43,7 +43,6 @@ import cn.ctyun.UIDSS.hgraph.{ HGraphUtil, GraphXUtil }
  */
 object GenUID {
 
-  val initialMsg = GraphXUtil.MAX_VERTICE
   var UID_PRIOR_QQ = 100
   var UID_PRIOR_ID = 5
   var UID_PRIOR_CI = 5
