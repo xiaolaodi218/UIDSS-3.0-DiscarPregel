@@ -28,6 +28,7 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.Cell;
 
 import scala.collection.mutable.ListBuffer
 
@@ -85,11 +86,32 @@ object HtoXGenUID extends Logging {
     bDebugVert
   }
 
-  def isVertNeedProcessing(row: String, iNeighbors: Int): Boolean = {
+  def isVertNeedProcessing(row: String, cells: Array[Cell]): Boolean = {
     var bNeedProcess = true
+    val iNeighbors = cells.size
     row.substring(0, 2) match {
-      case HGraphUtil.STR_CUST_ID  => { if (iNeighbors > 10) bNeedProcess = false }
-      case HGraphUtil.STR_ID_NUM   => { if (iNeighbors > 10) bNeedProcess = false }
+      //不会构成关联条件的ID, CI节点被过滤掉      
+      case HGraphUtil.STR_CUST_ID => { 
+          var iMN=0
+          var iWN=0
+          for (cell<-cells ) {
+            val cellType = Bytes.toString(cell.getQualifier).substring(2, 2)  
+            if (HGraphUtil.STR_MBL_NUM.compareTo(cellType)==0) iMN+=1
+            if (HGraphUtil.STR_MBL_NUM.compareTo(cellType)==0) iWN+=1
+          }
+          if (iNeighbors > 10 || iMN>1 || iWN > 1) bNeedProcess = false 
+        }
+       //不会构成关联条件的ID, CI节点被过滤掉          
+      case HGraphUtil.STR_ID_NUM   => { 
+          var iMN=0
+          var iWN=0
+          for (cell<-cells ) {
+            val cellType = Bytes.toString(cell.getQualifier).substring(2, 2)  
+            if (HGraphUtil.STR_MBL_NUM.compareTo(cellType)==0) iMN+=1
+            if (HGraphUtil.STR_MBL_NUM.compareTo(cellType)==0) iWN+=1
+          }
+          if (iNeighbors > 10 || iMN>1 || iWN > 1) bNeedProcess = false 
+      }
       case HGraphUtil.STR_QQ       => { if (iNeighbors > 10) { bNeedProcess = false } }
       //手机号关联比较多    9(+有多个ME) + 11(9 与IT侧有2重)  + UID
       case HGraphUtil.STR_MBL_NUM  => { if (iNeighbors > 30) bNeedProcess = false }
@@ -99,6 +121,7 @@ object HtoXGenUID extends Logging {
       case HGraphUtil.STR_ACCS_NUM => { if (iNeighbors > 20) bNeedProcess = false }
       // UID 最多拥有200个号        
       case HGraphUtil.STR_UD       => { if (iNeighbors > 200) bNeedProcess = false }
+      case HGraphUtil.STR_IMSI        => { if (iNeighbors > 10) bNeedProcess = false }
       case _                       => { bNeedProcess = false }
     }
     bNeedProcess
@@ -190,8 +213,7 @@ object HtoXGenUID extends Logging {
     val row = Bytes.toString(v.getRow.drop(2))
 
     //超大节点暂不考虑
-    val iNeighbors = v.rawCells().size
-    if (isVertNeedProcessing(row, iNeighbors)) {
+    if (isVertNeedProcessing(row, v.rawCells())) {
       for (c <- v.rawCells()) {
         var dst = Bytes.toString(c.getQualifier)
         dst = dst.substring(2)
@@ -226,8 +248,7 @@ object HtoXGenUID extends Logging {
 
     //超大节点暂不考虑
     val row = Bytes.toString(v.getRow.drop(2))
-    val iNeighbors = v.rawCells().size
-    if (isVertNeedProcessing(row, iNeighbors)) {
+    if (isVertNeedProcessing(row,  v.rawCells())) {
       //if (isDebugVert(row)) {  needPrint = true }
       for (c <- v.rawCells()) {
         var dst = Bytes.toString(c.getQualifier)

@@ -19,7 +19,9 @@
 
 package cn.ctyun.UIDSS.graphxop
 
-import org.apache.spark.graphx._
+import java.util.Properties
+
+import org.apache.spark.graphx.{EdgeTriplet,VertexId,Graph,EdgeDirection}
 import org.apache.hadoop.hbase.util.Bytes
 import cn.ctyun.UIDSS.hgraph._
 
@@ -29,7 +31,7 @@ import scala.collection.mutable.ListBuffer
 //找出图中所有的关联树,树名为树中节点的最小序号
 object PregelGenUID {
 
-  val initialMsg = 2*GraphXUtil.MAX_VERTICE
+  val initialMsg: Long = 2*GraphXUtil.MAX_VERTICE
 
   //找出连接子图
   //Vertex (vid: VertextId: Long, (id: String, (temp:Long, uid: String)))
@@ -136,7 +138,7 @@ object PregelGenUID {
         var newNeighbors = new ListBuffer[(Long, Long)]
         //把新消息更新进列表
         for (msg <- message) {
-                  val neighbor = neighbors.find({_._1==msg._1})
+                  var neighbor = neighbors.find({_._1==msg._1})
                   if (neighbor != None) {
                     //替换邻居最小值
                     newNeighbors +=((msg._1   ,msg._2 min neighbor.get._2))
@@ -160,14 +162,21 @@ object PregelGenUID {
     }
   }
 
-  def apply(graph: Graph[(String, (Long, List[(Long, Long)])), (String, Int)], depth: Int) = {
+  def apply(graph: Graph[(String, (Long, List[(Long, Long)])), (String, Int)], depth: Int, props: Properties ) = {
     //找出图中所有节点关联的UID节点,并记录到节点的UID属性中
-    graph.pregel(
+    Pregel(graph,
       List((initialMsg, 0L)), //初始消息,设置起点 
       depth, // 考虑网络侧的关联,多少层在配置文件里确定
-      EdgeDirection.Either)(
+      EdgeDirection.Either, props)(
         vprog,
         sendMsg,
         mergeMsg)
+//    graph.pregel(
+//      List((initialMsg, 0L)), //初始消息,设置起点 
+//      depth, // 考虑网络侧的关联,多少层在配置文件里确定
+//      EdgeDirection.Either)(
+//        vprog,
+//        sendMsg,
+//        mergeMsg)
   }
 }

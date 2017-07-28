@@ -23,7 +23,9 @@ package cn.ctyun.UIDSS.cmds
 import java.util.Properties
 import java.util.UUID
 import org.apache.spark.SparkContext
-import org.apache.spark.graphx._
+
+//import org.apache.spark.graphx._
+
 import org.apache.spark.rdd.RDD
 import org.apache.hadoop.hbase.util.Bytes
 import scala.collection.mutable.ListBuffer
@@ -163,7 +165,7 @@ object GenUIDExtCmd extends Logging {
     //PregelGenUID.setVidDebug(vidDebug.value) //传点序号
     val searchDepth = props.getProperty("searchDepth").toInt
     info(getNowDate() + " ******  search depth is " + searchDepth + "  *******")
-    val graphCnnd = PregelGenUID(graph, searchDepth)
+    val graphCnnd = PregelGenUID(graph, searchDepth, props)
     //info(getNowDate() +" ******  全图所有的节点，关联后状态 ******")
     //println("graphCnnd.vertices " + graphCnnd.vertices.collect().mkString("\n")) 
 

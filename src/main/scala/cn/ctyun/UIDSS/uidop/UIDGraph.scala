@@ -77,15 +77,26 @@ class UIDGraph(group: List[(String, String)]) {
 */
   private def init() = {
     var needPrint = false
+
+    var vlist = Set[String]()
+    for (v <- group) {
+       vlist += v._1
+    }
+    
     for (v <- group) {
       //      if ("QQ974834277".compareToIgnoreCase(v._1) == 0) {
       //        needPrint = true
       //      }
       //1.所有节点放到图(即邻接数组)中
+      
       val fields = v._2.split(";")
       if (v._2.length() > 0 && fields.size > 0) {
         var neighbors = Set[String]()
-        neighbors ++= fields.toList
+        //只有在图中的点的邻接关系被考虑,WN上连的UID不会通过WN连上,而是通过QQ等连上
+        for (field <- fields) {
+          if (vlist.contains(field)) {neighbors +=field}
+        }
+        //neighbors ++= fields.toList
         g += (v._1 -> neighbors)
         //println(v._1 + " has neighbors: " + neighbors.toList.toString())
 
@@ -220,47 +231,6 @@ class UIDGraph(group: List[(String, String)]) {
     }
     //println("idLnks:  from " + vSrc + " to " + idLnks.toString())
     idLnks
-  }
-
-  //根据规则确定是否是同一用户的
-  private def isSameUser(vSrc: String, vDst: String, idLnks: Set[String]) = {
-    var iQQ = 0;
-    var iTDID = 0;
-    var iID = 0;
-    var iCI = 0;
-
-    for (vInter <- idLnks) {
-      val typ = vInter.substring(0, 2)
-      val styp = vSrc.substring(0, 2)
-      val dtyp = vDst.substring(0, 2)
-
-      typ match {
-        case HGraphUtil.STR_QQ => {
-          iQQ = iQQ + 1
-        }
-        case "singleMNId" => {
-          iTDID = iTDID + 1
-        }
-        case HGraphUtil.STR_ID_NUM => {
-          //只有移动号与固话号之间可以通过ID相等
-          if (styp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0
-            && dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0) {
-            iID = iID + 1
-          }
-        }
-        case HGraphUtil.STR_CUST_ID => {
-          //只有移动号与固话号之间可以通过ID相等
-          if (styp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0
-            && dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0) {
-            iCI = iCI + 1
-          }
-        }
-        case _ =>
-      }
-    }
-
-    var iweight = iQQ * 100 + iID + iCI + iTDID
-    iweight >= 1
   }
 
   //根据规则确定是否是同一用户的
@@ -473,7 +443,9 @@ class UIDGraph(group: List[(String, String)]) {
           //不是ID节点, 则进一步搜索连接的节点
           case HGraphUtil.STR_QQ => {
             //只有与移动号相邻的QQ才参与UID生成
-            if (an.substring(0, 2).compareTo(HGraphUtil.STR_MBL_NUM) == 0) {
+            //if (an.substring(0, 2).compareTo(HGraphUtil.STR_MBL_NUM) == 0) {
+            if (an.substring(0, 2).compareTo(HGraphUtil.STR_MBL_NUM) == 0
+                ||an.substring(0, 2).compareTo(HGraphUtil.STR_WB_NUM) == 0) {
               val lnks2nd = g.getOrElse(vID, Set[String]())
               //与ID节点相邻的所有节点
               for (vIDLnk <- lnks2nd) {
@@ -541,7 +513,7 @@ class UIDGraph(group: List[(String, String)]) {
       }
     }
 
-    //已经用过的UID不能再用
+    //别的组已经用过(抢先分得)的原有UID不能再用
     if (maxUid.length() > 0 && uidsUsed.contains(maxUid)) {
       maxUid = ""
     }
@@ -566,7 +538,7 @@ class UIDGraph(group: List[(String, String)]) {
 
     lstGroupUID = lstGroupUID.map { vertex =>
       {
-        //宽带UID只增不删
+        //宽带有多个UID, 只增不删,不能覆盖
         if (vertex._2.length() > 0) {
           var count = uidCounts.getOrElse(vertex._2, 0)
           val typ = vertex._1.substring(0, 2)
