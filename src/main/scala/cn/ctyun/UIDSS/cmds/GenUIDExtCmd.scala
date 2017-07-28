@@ -39,7 +39,7 @@ import org.apache.hadoop.hbase.client.Put
 import cn.ctyun.UIDSS.utils.{ Utils, Logging }
 import cn.ctyun.UIDSS.hgraph.{ HGraphUtil, GraphXUtil, HtoXGenUID, XtoHGenUID, XtoHGenUIDExt }
 import cn.ctyun.UIDSS.hbase.HBaseIO
-import cn.ctyun.UIDSS.graphxop.{ PregelGenUIDExtFindLinks, PregelGenUID }
+import cn.ctyun.UIDSS.graphxop.{ PregelGenUIDExtFindLinks, PregelGenUID, PregelGenUIDFindPairs }
 import cn.ctyun.UIDSS.uidop.{ GenUID, GenUIDExt }
 
 /**
@@ -165,7 +165,8 @@ object GenUIDExtCmd extends Logging {
     //PregelGenUID.setVidDebug(vidDebug.value) //传点序号
     val searchDepth = props.getProperty("searchDepth").toInt
     info(getNowDate() + " ******  search depth is " + searchDepth + "  *******")
-    val graphCnnd = PregelGenUID(graph, searchDepth, props)
+    //val graphCnnd = PregelGenUID(graph, searchDepth, props)
+    val graphCnnd = PregelGenUIDFindPairs(graph, 3, props)
     //info(getNowDate() +" ******  全图所有的节点，关联后状态 ******")
     //println("graphCnnd.vertices " + graphCnnd.vertices.collect().mkString("\n")) 
 
