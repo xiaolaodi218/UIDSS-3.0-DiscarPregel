@@ -77,7 +77,7 @@ object UIDSS extends Logging {
     cmd match {
       case "BatchQuery"     => BatchQueryCmd.execute(sc, props)
       case "GenerateUID"    => GenUIDCmd.execute(sc, props)
-      case "GenerateUIDExt" => GenUIDExtCmd.execute(sc, props, args(1))
+      case "GenerateUIDExt" => GenUID3Cmd.execute(sc, props, args(1))
       case "LoadRawData" => {
         if (args.length < 3) {
           println("There should be at least 3 arguments! ")
