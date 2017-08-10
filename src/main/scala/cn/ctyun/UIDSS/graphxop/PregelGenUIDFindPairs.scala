@@ -100,7 +100,7 @@ object PregelGenUIDFindPairs {
       if (HGraphUtil.STR_ACCS_NUM.compareTo(value._1) == 0
           || HGraphUtil.STR_MBL_NUM.compareTo(value._1) == 0
           || HGraphUtil.STR_WB_NUM.compareTo(value._1) == 0) { //通信号码节点
-        neighbors +=((vertexId ,vertexId))
+        neighbors +=((vertexId ,0L))
       } 
       //初始化时，保留初始值不变。 value._1 为节点类型；相邻最小值都初始为0（在本功能无用处）； 
       //通信号码节点的邻接号码列表有一个元素，即自己到自己，其它节点没有

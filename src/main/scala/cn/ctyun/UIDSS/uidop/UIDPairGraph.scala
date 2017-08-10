@@ -137,7 +137,12 @@ class UIDPairGraph(group: List[(String, String)]) {
     //1.按（QQ，TDID）等ID信息，连接同一用户的号码，并保存在 gEqu
     findEqualANPair()
     //println("findEqualANPair(), map gEqu: " + gEqu.toString())
-    gEqu.size>0
+    
+    var iEqu = 0
+    for (itr <-gEqu) {
+      iEqu =  iEqu + itr._2.size
+    }    
+    iEqu>0
 
   }
 

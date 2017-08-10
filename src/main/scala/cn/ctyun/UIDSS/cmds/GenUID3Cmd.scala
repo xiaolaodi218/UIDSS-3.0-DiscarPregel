@@ -93,54 +93,47 @@ object GenUID3Cmd extends Logging {
     //HBase分片大小并不均匀, 强制先进行repartition工作,避免与之后阶段工作一起进行,单个单个节点负载过重.
     val cnt = rdd.count().toString()
     info(" ******  Read " + cnt + " rows from HBase ******")
-    println(" ******  Read " + cnt + " rows from HBase ******")
 
     /******** 二、生成图 *******/
+    //从HBase邻接表,转为GraphX的图
     //Input: RDD[(ImmutableBytesWritable, Result)]
-    //Output: Graph[(String, Long), (String, Int)]
+    //Output: Graph[(String, (Long, List[(Long, Long)])), (String, Int)]
     //---其中   Vertex (vid: Long, (typ: String, temp:Long))
     //---         Edge (src: Long, dst: Long, prop: (typ: String , weight: Int) )
     info(getNowDate() + " ******  从  RDD 生成图  ******")
     val graph = HtoXGenUID.getGraphRDD(rdd, sc)
 
 
-
     /******** 三、找出图中所有的号码对及孤立号码 *******/
-    //Input: Graph[(String, Long), (String, Int)]
-    //Output: Graph[(String, Long), (String, Int)]
-    //---其中   
-    //  Vertex (vid: Long, (typ: String, temp:Long))
-    //  typ: 节点类型；temp: Long 记录了树中节点的最小序号  
-    //  Edge (src: Long, dst: Long, prop: (typ: String , weight: Int) )
-    //  typ: 连接类型；weight: Int 连接权重  
-
+    //GraphX的图，通过2层pregel找出相邻号码 
     val searchDepth = props.getProperty("searchDepth").toInt
-    info(getNowDate() + " ******  search depth is " + searchDepth + "  *******")
-    //val graphCnnd = PregelGenUID(graph, searchDepth, props)
     val graphCnnd = PregelGenUIDFindPairs(graph, 3, props)
-    //info(getNowDate() +" ******  全图所有的节点，关联后状态 ******")
     println("graphCnnd.vertices: \n" + graphCnnd.vertices.collect().mkString("\n")) 
 
+    //把GraphX的图中节点的邻接表展开为号码对
     //input:
     // vert:   (VertexId,(String, (Long, List[(Long, Long)])))
     //(1004520000000001,(CI,(0,List((1003750000000001,1000510000000001), (1003830000000001,1000510000000001), (1000510000000001,1000510000000001)))))
     //(1002150000000001,(UD,(0,List((1003850000000001,1002700000000001), (1002700000000001,1002700000000001)))))
     //output:/
-    //(1002150000000001,(UD,(1003850000000001)))
-    //(1002150000000001,(UD,(1002700000000001)))
+    //((1000960000000001,0),1)
+    //((1002700000000001,1003750000000001),1)
+    //((1002700000000001,1003830000000001),1)
+    //((1002700000000001,1003850000000001),1)
+    //((1002700000000001,1002700000000001),1)
+    //((1000140000000001,0),1)
     var rddDirectedRawCNPairs = graphCnnd.vertices.flatMap { vert =>
       {
         var verts = new ListBuffer[((Long,Long), Int)]
         if (HGraphUtil.STR_ACCS_NUM.compareTo(vert._2._1) == 0
           || HGraphUtil.STR_MBL_NUM.compareTo(vert._2._1) == 0
           || HGraphUtil.STR_WB_NUM.compareTo(vert._2._1) == 0) { //通信号码节点
-
           val neighbors = vert._2._2._2
-          if (neighbors.length == 0) { //孤立的号码
-            verts += (((vert._1, 0L), 1))
+          if (neighbors.length < 2) { //孤立的号码
+            verts += (((vert._1, 0L), 1))  //只有一个虚拟号码对
           } 
           else { //有邻居的号码
-            for (neighbor <- neighbors) { verts += (((vert._1 min neighbor._1, vert._1 max neighbor._1),  1)) } //号码对,并排序
+            for (neighbor <- neighbors) { verts += (((vert._1 min neighbor._1, vert._1 max neighbor._1),  1)) } //号码对展开,并把号码对里的两个号码排序
           }
         }
         verts.toIterable
@@ -148,14 +141,22 @@ object GenUID3Cmd extends Logging {
     }
     println("rddDirectedRawCNPairs: \n " + rddDirectedRawCNPairs.collect().mkString("\n")) 
     
-    //号码对合并重复的,出现次数相加
+    //合并重复的号码对,出现次数相加
+    //output:
+    //((1000490000000001,0),1)  孤立节点自己到自己的边
+    //((1000510000000001,1000510000000001),1)   非孤立节点自己到自己的边
+    //((1002700000000001,1003850000000001),2)    非孤立节点之间成对的边
      rddDirectedRawCNPairs = rddDirectedRawCNPairs.reduceByKey {
       case (weight1, weight2) => { //双向都会出现（应该是出现两次），合并重复的
          weight1 + weight2 
       }
     }
     println("rddDirectedRawCNPairs merged " + rddDirectedRawCNPairs.collect().mkString("\n"))      
-     
+    
+    //找出成对的号码
+    //output:
+    //(1001250000000001,1003750000000001)
+    //(1001320000000001,1003830000000001)
     val rddRawCNPairs = rddDirectedRawCNPairs.flatMap {
       case (((sn1, sn2), weight)) => {
         val buf = new ListBuffer[(Long, Long)]
@@ -167,71 +168,65 @@ object GenUID3Cmd extends Logging {
         buf.toIterable
       }
     }
-
     println("rddRawCNPairs: \n " + rddRawCNPairs.collect().mkString("\n"))          
     
-    //孤立的号码
+    //找出孤立的号码
+    //output:
+    //1000960000000001
     val rddLonelyCN =   rddDirectedRawCNPairs.flatMap {
       case (((sn1, sn2), weight)) => {
         val buf = new ListBuffer[Long]
-        if (weight== 1 && sn1==sn2) { //号码对
+        if (weight== 1 && sn2==0L) { //号码对
           //调试用
           buf += (sn1)
         }
         buf.toIterable
       }      
     }
-
-     println("rddLonelyCN: \n " + rddLonelyCN.collect().mkString("\n"))             
+    println("rddLonelyCN: \n " + rddLonelyCN.collect().mkString("\n"))             
    
-    //Input: 
-    //1.  Graph[(String, (Long, String)), (String, Long)]
-    //---其中       
-    //  Vertex (vid: Long, (typ: String, cvid:Long))
-    //  vid: 节点序号; typ: 节点类型；cvid: Long 记录了树中节点的最小序号  
-    //  Edge (src: Long, dst: Long, prop: (typ: String , weight: Int) )
-    //  typ: 连接类型；weight: Int 连接权重  
-    //2.  (vid: Long, (id: String, links: String))
-    //  vid: 节点序号; id: id标识； links: 邻接表
-
-    //节点序号与事先存储邻接表对应 
-    // input :  
-    // (vid:Long,  (id: String, links: String))
-    // (vid:Long, (typ: String, cvid:Long))
-    //output: 
-    // (vid:Long, ((id: String, links: String),(typ: String, cvid:Long) ) ) 
-    
-    
-    //为起点找到编码和所有邻接点
+     /******** 四、找出最终的有效号码对 *******/      
+    //为起点找到其编码及所有邻接点
+    //output:
+    //(1002700000000001,((WN8D000000,QQ25300000;QQ47900000;QQ94200000;UD4511d6d592c74237b021e17d4b28caa6),1003750000000001))
     val rddRawCNPairsJoinF = HtoXGenUID.rddVidtoLinks.join(rddRawCNPairs)
     println("rddRawCNPairsJoinF " + rddRawCNPairsJoinF.collect().mkString("\n")) 
-
-    //Input: 
-    // (vId:Long, ((id: String, links: String),(typ: String, cvid:Long) ) ) 
+    
+    //调整一下元素位置，key放在前面
     val rddRawCNPairsWithLinksF = rddRawCNPairsJoinF.map {
       case (s_vid, ((id, links), e_vid)) => {
         (e_vid, ((s_vid,id), links))
       }
     }
 
-     //为终点找到编码和所有邻接点
+    //为终点找到其编码及所有邻接点
+    //output:
+    //(((1002700000000001,WN8D000000),QQ25300000;QQ47900000;QQ94200000;UD4511d6d592c74237b021e17d4b28caa6),((1003750000000001,WN2B000000),QQ25400000;QQ37600000;QQ41200000;UD4511d6d592c74237b021e17d4b28caa6))
     val rddRawCNPairsJoinS = HtoXGenUID.rddVidtoLinks.join(rddRawCNPairsWithLinksF)
-
-
     val rddRawCNPairsWithLinks = rddRawCNPairsJoinS.map {
       case (e_vid, ((e_id, e_links), ((s_vid, s_id),s_links))) => {
         (((s_vid,s_id),s_links),((e_vid,e_id), e_links))
       }
     }
-    println("rddRawCNPairsWithLinks " + rddRawCNPairsWithLinks.collect().mkString("\n")) 
+    println("rddRawCNPairsWithLinks: \n " + rddRawCNPairsWithLinks.collect().mkString("\n")) 
     
     //判断是否是属于同一用户的号码对
-    //判断是否同一人的号码对，建立号码之间关联  （按号码对取出子图 （）， 返回一对或2对1个号码（没有匹配上）graph的判断号码对算法）     （一对（1个），或直接一个号码）
+    //建立号码之间关联  （按号码对取出子图 （）， 
+    //返回: 
+    //   一对号码 (是属于同一用户的两个号码)
+    //   或2个虚号码对（即只有一个号码的号码对，后面用0L补上）（UIDPairGraph的判断号码对算法认为没有匹配上）
+    //output:
+    //((1002700000000001,WN8D000000),(0,))      没有匹配的节点
+    //((1003830000000001,WNFF000000),(0,))       没有匹配的节点  
+    //((1001250000000001,MN20000000),(1003830000000001,WNFF000000))         匹配的号码对 
+    //((1000510000000001,MN0E000000),(1003830000000001,WNFF000000))         匹配的号码对
     val rddRealPairs = GenUIDExtPair(rddRawCNPairsWithLinks, props)
-    println("rddRealPairs " + rddRealPairs.collect().mkString("\n"))     
+    println("rddRealPairs: \n" + rddRealPairs.collect().mkString("\n"))     
 
-    //号码之间的关联， 建立graphx图.   号码是点，号码对是边。 
-    var rddEdge = rddRealPairs.flatMap{ case (((s_vid,s_id),s_links),((e_vid,e_id), e_links)) => {
+    
+    /******** 五、以通信号码为点, 以有效号码对为边, 再次构建图 *******/
+    //号码之间的关联是边。 
+    var rddGroupEdge = rddRealPairs.flatMap{ case ((s_vid,s_id),(e_vid,e_id)) => {
         val buf = new ListBuffer[Edge[(String, Int)]]
         if (e_vid>0) {
           buf += Edge(s_vid, e_vid, ("PR", 1))
@@ -239,33 +234,32 @@ object GenUID3Cmd extends Logging {
         buf.toIterable
       }    
     }
+    println("rddGroupEdge: \n" + rddGroupEdge.collect().mkString("\n"))    
     
-    val rddVertex = rddRealPairs.flatMap{ case (((s_vid,s_id),s_links),((e_vid,e_id), e_links)) => {
+    //点
+    val rddGroupVertex = rddRealPairs.flatMap{ case ((s_vid,s_id),(e_vid,e_id)) => {
         val buf = new ListBuffer[(Long, (String,  (Long, List[(Long, Long)])))]
         val neighbors : List[(Long, Long)]= List()
         if (e_vid>0) {
-          buf += ((s_vid, (s_id, (0L,neighbors))))
-          buf += ((e_vid, (e_id, (0L,neighbors)))) 
+          buf += ((s_vid, (s_id.substring(0,2), (0L,neighbors))))
+          buf += ((e_vid, (e_id.substring(0,2), (0L,neighbors)))) 
         } else {
-          buf += ((s_vid, (s_id, (0L,neighbors))))
+          buf += ((s_vid, (s_id.substring(0,2), (0L,neighbors))))
         }
           buf.toIterable
         }
       }    
-    
-    
-     val graphPairs = Graph(rddVertex, rddEdge, null, StorageLevel.MEMORY_AND_DISK, StorageLevel.MEMORY_AND_DISK)    
+     println("rddGroupVertex: \n" + rddGroupVertex.collect().mkString("\n"))       
+     
+     val graphPairs = Graph(rddGroupVertex, rddGroupEdge, null, StorageLevel.MEMORY_AND_DISK, StorageLevel.MEMORY_AND_DISK)    
+     
+     /******** 六、找出图中所有通信号码所属group *******/    
     //	pregel 获得 关联的组
     val graphGroup = PregelGenUIDFindGroups(graphPairs, 3, props)
-//  
-    //节点序号与事先存储邻接表对应 
-    // input :  
-    // (vid:Long,  (id: String, links: String))
-    // (vid:Long, (typ: String, cvid:Long))
-    //output: 
-    // (vid:Long, ((id: String, links: String),(typ: String, cvid:Long) ) ) 
+    println("graphGroup.vertices: \n" + graphGroup.vertices.collect().mkString("\n")) 
+    println("graphGroup.edges : \n" + graphGroup.edges.collect().mkString("\n")) 
     
-    // vert:   (VertexId,(String, (Long, List[(Long, Long)])))
+    //需要扩展多连接的节点到多个组
     val rddVerticesExt = graphGroup.vertices.flatMap { vert =>
       {
         var verts = new ListBuffer[(Long, (String, Long))]
@@ -278,26 +272,30 @@ object GenUID3Cmd extends Logging {
         }
         verts.toIterable
       }
-    }
+    }     
+    println("rddVerticesExt group:  \n" + rddVerticesExt.collect().mkString("\n"))      
     
+    //graphx中的点还原为 邻接表节点
     val rddLinksJoinVerts = HtoXGenUID.rddVidtoLinks.join(rddVerticesExt)
-    println("rddLinksJoinVerts " + rddLinksJoinVerts.collect().mkString("\n")) 
+    println("rddLinksJoinVerts:  \n" + rddLinksJoinVerts.collect().mkString("\n")) 
 
-    //转为以最小序号为key的二元组
-    //Input: 
     // (vId:Long, ((id: String, links: String),(typ: String, cvid:Long) ) ) 
     val rddCnndInId = rddLinksJoinVerts.map {
       case (vid, ((id, links), (typ, cvid))) => {
         //if (isDebugVert(id) ) { println("" + id + " has links" + links + "; cvid is " + cvid)    }
         (cvid, (id, links))
       }
-    }
-    
-    
+    }    
+
+    //找出属于同一组的节点
     val rddCnndGroup = rddCnndInId.groupByKey().map { case (v) => v._2.toList }
-     println("rddCnndGroup is:  " + rddCnndGroup.collect().mkString("\n"))
+     println("rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
     
-    /******** 五、UID生成 *******/
+     //还需要需要加入孤立节点
+     
+     //还需要把所有关联的UID节点加入，
+     
+    /******** 七、UID生成 *******/
     //	把所有的组的信息 组成图。
     //算出优势UID，如果没有则要生成
     //Output: RDD[(String, List[(String, String)])]   即每个邻接树的所有节点保存为一个List 
@@ -308,7 +306,7 @@ object GenUID3Cmd extends Logging {
     //println("rddGroupWithUID is:  " + rddGroupWithUID.collect().mkString("\n"))
     
 
-    /********六、计算出需要添加（更新）的UID边 *******/
+    /********八、计算出需要添加（更新）的UID边 *******/
     //记下所有要添加的（原来没有UID的节点，增加到），更新的（对应2条： 删除旧的[即添加权重为0的到旧]，添加新的[]）
     //Input: RDD[List[(id: String, uid: String)]]   即每个邻接树的所有节点保存为一个List. 其中 id: 是节点id  , uid: String 记录了相邻的UID
     //Output: RDD[((String, String), Long)]     ((行，列)，值）)
@@ -318,7 +316,7 @@ object GenUID3Cmd extends Logging {
     var rddNewRelations = XtoHGenUIDExt(rddGroupWithUID)
     //println("rddNewRelations is:  " +  rddNewRelations.collect().mkString("\n"))
 
-    /********七、保存UID边到HBase *******/
+    /********九、保存UID边到HBase *******/
     //row  ((行，列)，值）)
     HBaseIO.saveToGraphTable(sc, props, rddNewRelations)
   }
