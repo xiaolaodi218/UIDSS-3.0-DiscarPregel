@@ -33,99 +33,132 @@ object PregelGenUIDFindGroups {
 
   val initialMsg: Long = 2*GraphXUtil.MAX_VERTICE
 
-  //找出连接号码对
+  //找出连接子图
   //Vertex (vid: VertextId: Long, (id: String, (temp:Long, uid: String)))
   //Edge (src: VertexId, dst: VertexId, prop: (type: String , weight: Long) )
   def sendMsg(edge: EdgeTriplet[(String, (Long, List[(Long, Long)])), (String, Int)]): Iterator[(VertexId, List[(Long, Long)])] = {
+    
+    //println("sendMsg;  " +  edge.toString() )
+    val srcType : String = edge.srcAttr._1.substring(0, 2)  
+    val dstType : String = edge.dstAttr._1.substring(0, 2) 
+    var srcMinID = edge.srcAttr._2._1
+    var dstMinID = edge.dstAttr._2._1
+    val srcNeighbors =  edge.srcAttr._2._2
+    val dstNeighbors =  edge.dstAttr._2._2
+    
+    //分情况取出边的两端的最小ID
+    //其中：宽带与宽带之间直接相连的情况已经在前面过滤掉.
+    if (0== HGraphUtil.STR_WB_NUM.compareTo(srcType) ) { //src是宽带节点
+        val neighbor = srcNeighbors.find({_._1==edge.dstId})
+        if (neighbor != None) {
+          srcMinID = neighbor.get._2
+        }
+    }
+    else if (0== HGraphUtil.STR_WB_NUM.compareTo(dstType)) { //dst是宽带节点
+        val neighbor = dstNeighbors.find({_._1==edge.srcId})
+        if (neighbor != None) {
+          dstMinID = neighbor.get._2
+        }
+    }
+    else {  //两端都是普通节点      
+    }
+    
+    //边的两端的最小ID的大小相等，不需要传播什么
+    if (srcMinID == dstMinID) {
+      //println(triplet.srcAttr._2 + " is terminated " )    
+      Iterator.empty //如果当前节点所属树的序号==目标节点所属树的序号, 不用再遍历
+    } else {
+      
+      var dst = 0L
+      var src = 0L
+      var v = 0L
 
-    val srcID = edge.srcId
-    val dstID = edge.dstId
-    val srcNeighbors = edge.srcAttr._2._2
-    val dstNeighbors = edge.dstAttr._2._2
-
-    var dstNewNeighbors = new ListBuffer[(Long, Long)]
-    var srcNewNeighbors = new ListBuffer[(Long, Long)]
-
-    //比较两端是否有对端不知道的邻居
-    for (srcNeighbor <- srcNeighbors) {
-      val matching = dstNeighbors.find({ _._1 == srcNeighbor._1 })
-      if (matching == None) {
-        //尚未发现的邻居
-        dstNewNeighbors += ((srcNeighbor._1, srcID))
+    //分情况取出边的两端的最小ID
+    //其中：宽带与宽带之间直接相连的情况已经在前面过滤掉.
+    //宽带号不应该广播自己。其它节点一直往宽带号广播。直到对应ID相等。
+    if (0== HGraphUtil.STR_WB_NUM.compareTo(srcType) ) { //src是宽带节点
+        dst = edge.srcId
+        src = edge.dstId
+        v = dstMinID
+    }
+    else if (0== HGraphUtil.STR_WB_NUM.compareTo(dstType)) { //dst是宽带节点
+        dst = edge.dstId
+        src = edge.srcId
+        v = srcMinID
+    }
+    else {  //两端都是普通节点      
+      //根据边的两端的最小ID的大小确定传播方向和值
+      if (srcMinID < dstMinID) {
+        dst = edge.dstId
+        src = edge.srcId
+        v = srcMinID
+      } 
+      else if (srcMinID > dstMinID) {
+        dst = edge.srcId
+        src = edge.dstId
+        v = dstMinID
       }
     }
-    for (dstNeighbor <- dstNeighbors) {
-      val matching = srcNeighbors.find({ _._1 == dstNeighbor._1 })
-      if (matching == None) {
-        //尚未发现的邻居
-        srcNewNeighbors += ((dstNeighbor._1, dstID))
-      }
-    }
-
-    //把彼此不知道节点的传递下去
-    if (dstNewNeighbors.size > 0 && srcNewNeighbors.size > 0) {
-      Iterator((dstID, dstNewNeighbors.toList), (srcID, srcNewNeighbors.toList))
-    } 
-    else if (dstNewNeighbors.size > 0 && srcNewNeighbors.size == 0) {
-      Iterator((dstID, dstNewNeighbors.toList))
-    } 
-    else if (dstNewNeighbors.size == 0 && srcNewNeighbors.size > 0) {
-      Iterator((srcID, srcNewNeighbors.toList))
-    } 
-    else {
-      Iterator.empty //两边都没有需要广播的新邻居
+      
+      //调试代码
+        if (edge.srcAttr._1.length()>2 || edge.dstAttr._1.length()>2) {
+          println( "" + src  + " is sending message  " + v + "  to  vertex " + dst  + " " )
+          println( "src is " + edge.srcAttr.toString()  + "; dst is " +edge.dstAttr.toString() )
+        }  
+        Iterator((dst, List((src,v)))) //把有较小ID的节点的值传递下去
+      //}
     }
   }
 
   def mergeMsg(msg1: List[(Long, Long)], msg2: List[(Long, Long)]): List[(Long, Long)] = {
     //Only by selecting the smallest one can all the connected vertex ultimately be grouped into one group. 
     //只是把消息连接起来,不做其它处理
-    var msgs = msg1:::msg2    
-    msgs = msgs.sortWith(_._1<_._1)
-    var msgBuf = new ListBuffer[(Long, Long)]
-    var cur = 0L
-    for (msg  <-  msgs) {
-      if (msg._1 > cur){ 
-        msgBuf+= ((msg))
-        cur = msg._1
-      }
-    }
-    msgBuf.toList
+    msg1:::msg2
   }
 
   def vprog(vertexId: VertexId, value: (String, (Long, List[(Long, Long)])), message: List[(Long, Long)]): (String, (Long, List[(Long, Long)])) = {
 
     if (1 == message.length && initialMsg == message.head._1) { //初始化消息
-      var neighbors = new ListBuffer[(Long, Long)]
-      if (HGraphUtil.STR_ACCS_NUM.compareTo(value._1) == 0
-          || HGraphUtil.STR_MBL_NUM.compareTo(value._1) == 0
-          || HGraphUtil.STR_WB_NUM.compareTo(value._1) == 0) { //通信号码节点
-        neighbors +=((vertexId ,vertexId))
-      } 
-      //初始化时，保留初始值不变。 value._1 为节点类型；相邻最小值都初始为0（在本功能无用处）； 
-      //通信号码节点的邻接号码列表有一个元素，即自己到自己，其它节点没有
-      (value._1, (0, neighbors.toList)) 
+      // println(value._1 + " is assigned vertex id " + vertexId + " , initialMsg is " + initialMsg + " , message is " + message )
+      (value._1, (vertexId, value._2._2)) //最初把每个节点的值都初始为自己的节点序号
     } else {
-      //中间pregel消息
+      
+      //普通pregel消息
+      var minimal: Long = initialMsg
+      for (msg <- message) {
+        if (msg._2 < minimal) { minimal = msg._2 }
+      }
+      
+      if (HGraphUtil.STR_WB_NUM.compareTo(value._1) != 0) { //非宽带节点
+        //println(value._1 + " is assigned " + (message min value._2) + " , message is " + message )
+        (value._1, (value._2._1 min minimal, value._2._2)) //记下最小的节点序号         
+      } 
+      else { //宽带节点
         var neighbors =  value._2._2
         var newNeighbors = new ListBuffer[(Long, Long)]
-        //把新路径更新进列表
+        //把新消息更新进列表
         for (msg <- message) {
                   var neighbor = neighbors.find({_._1==msg._1})
-                  if (neighbor == None) {
+                  if (neighbor != None) {
+                    //替换邻居最小值
+                    newNeighbors +=((msg._1   ,msg._2 min neighbor.get._2))
+                  } 
+                  else {
                     //如果没有就添加
                     newNeighbors += ((msg._1   ,msg._2))                    
                   }             
         }
-        //把原来的路径也写进列表
+        //把没有得到消息的邻居也写进列表
         for (neighbor <- neighbors) {
                   val msgMatching = message.find({_._1==neighbor._1})
                   if (msgMatching == None) {
+                    //没有得到消息的邻居
                     newNeighbors += ((neighbor._1   ,neighbor._2))                    
                   }             
         }
         
-        (value._1, (0, newNeighbors.toList)) //记下最小的节点序号   
+        (value._1, (value._2._1 min minimal, newNeighbors.toList)) //记下最小的节点序号   
+      }
     }
   }
 

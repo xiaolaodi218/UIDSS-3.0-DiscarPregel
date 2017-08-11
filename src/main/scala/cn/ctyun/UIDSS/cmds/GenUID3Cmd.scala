@@ -173,12 +173,12 @@ object GenUID3Cmd extends Logging {
     //找出孤立的号码
     //output:
     //1000960000000001
-    val rddLonelyCN =   rddDirectedRawCNPairs.flatMap {
+    var rddLonelyCN =   rddDirectedRawCNPairs.flatMap {
       case (((sn1, sn2), weight)) => {
-        val buf = new ListBuffer[Long]
+        val buf = new ListBuffer[(Long, Int)]
         if (weight== 1 && sn2==0L) { //号码对
           //调试用
-          buf += (sn1)
+          buf += ((sn1, 1))
         }
         buf.toIterable
       }      
@@ -236,20 +236,32 @@ object GenUID3Cmd extends Logging {
     }
     println("rddGroupEdge: \n" + rddGroupEdge.collect().mkString("\n"))    
     
-    //点
+    //配对的点进行下一步合并归组运算
     val rddGroupVertex = rddRealPairs.flatMap{ case ((s_vid,s_id),(e_vid,e_id)) => {
         val buf = new ListBuffer[(Long, (String,  (Long, List[(Long, Long)])))]
         val neighbors : List[(Long, Long)]= List()
         if (e_vid>0) {
           buf += ((s_vid, (s_id.substring(0,2), (0L,neighbors))))
           buf += ((e_vid, (e_id.substring(0,2), (0L,neighbors)))) 
-        } else {
-          buf += ((s_vid, (s_id.substring(0,2), (0L,neighbors))))
         }
           buf.toIterable
         }
       }    
      println("rddGroupVertex: \n" + rddGroupVertex.collect().mkString("\n"))       
+     
+     //未配对的点, 留到以后再用
+     var rddNotPaired = rddRealPairs.flatMap{ case ((s_vid,s_id),(e_vid,e_id)) => {
+     val buf = new ListBuffer[(Long, Int)]
+        val neighbors : List[(Long, Long)]= List()
+        if (e_vid==0L) {
+          buf += ((s_vid, 1))
+        }
+          buf.toIterable
+        }
+      } 
+     rddNotPaired = rddNotPaired.distinct()     
+     println("rddNotPaired: \n" + rddNotPaired.collect().mkString("\n"))       
+     
      
      val graphPairs = Graph(rddGroupVertex, rddGroupEdge, null, StorageLevel.MEMORY_AND_DISK, StorageLevel.MEMORY_AND_DISK)    
      
@@ -268,7 +280,12 @@ object GenUID3Cmd extends Logging {
           verts += ((vert._1, (vert._2._1, vert._2._2._1)))
         } 
         else { //需要扩展的节点,比如宽带节点
-          for (neighbor <- neighbors) { verts += ((vert._1, (vert._2._1, neighbor._2))) }
+          var groupList = Set[Long]()
+          for (neighbor <- neighbors) {
+              if (!groupList.contains(neighbor._2))  groupList+=neighbor._2
+          }            
+          for (g <- groupList) 
+            verts += ((vert._1, (vert._2._1, g))) 
         }
         verts.toIterable
       }
@@ -279,21 +296,37 @@ object GenUID3Cmd extends Logging {
     val rddLinksJoinVerts = HtoXGenUID.rddVidtoLinks.join(rddVerticesExt)
     println("rddLinksJoinVerts:  \n" + rddLinksJoinVerts.collect().mkString("\n")) 
 
-    // (vId:Long, ((id: String, links: String),(typ: String, cvid:Long) ) ) 
     val rddCnndInId = rddLinksJoinVerts.map {
       case (vid, ((id, links), (typ, cvid))) => {
-        //if (isDebugVert(id) ) { println("" + id + " has links" + links + "; cvid is " + cvid)    }
         (cvid, (id, links))
       }
     }    
-
     //找出属于同一组的节点
-    val rddCnndGroup = rddCnndInId.groupByKey().map { case (v) => v._2.toList }
-     println("rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
+    var rddCnndGroup = rddCnndInId.groupByKey().map { case (v) => v._2.toList }
+    println("rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
     
      //还需要需要加入孤立节点
+     rddLonelyCN = rddLonelyCN.++(rddNotPaired)
+     val rddLonelyCNwithLinks = HtoXGenUID.rddVidtoLinks.join(rddLonelyCN)
+
+    val rddLonelyGroup = rddLonelyCNwithLinks.flatMap {
+      case (vid, ((id, links), typ)) => {
+        val buf = new ListBuffer[List[(String, String)]]
+        if (links.length()>0) {  //异网手机号, 因为只和宽带号关联, 没有imsi被过滤掉
+          buf += (List((id, links)))
+        }
+        buf.toIterable
+      }
+    }    
+    println("rddLonelyGroup is:  \n " + rddLonelyGroup.collect().mkString("\n")) 
+    //println("HtoXGenUID.rddVidtoLinks is:  \n " +HtoXGenUID.rddVidtoLinks.collect().mkString("\n")) 
      
-     //还需要把所有关联的UID节点加入，
+    
+    
+    //所有的组
+    rddCnndGroup = rddCnndGroup.++(rddLonelyGroup)
+    println("New rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
+
      
     /******** 七、UID生成 *******/
     //	把所有的组的信息 组成图。
@@ -303,7 +336,7 @@ object GenUID3Cmd extends Logging {
     //---比如   UDc7e88a94542343fa83ff7a5b6c18c57e， List((AI430851876,), (IDb5eafeb6f2e8228df4c23fc2e4f1f0b2,),...)
     info(getNowDate() + " ****** 算出优势UID，如果没有则要生成   ******")
     val rddGroupWithUID = GenUIDExtGroup(rddCnndGroup, props)
-    //println("rddGroupWithUID is:  " + rddGroupWithUID.collect().mkString("\n"))
+    println("rddGroupWithUID is:  " + rddGroupWithUID.collect().mkString("\n"))
     
 
     /********八、计算出需要添加（更新）的UID边 *******/
