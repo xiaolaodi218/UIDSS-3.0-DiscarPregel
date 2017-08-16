@@ -114,16 +114,16 @@ object Pregel extends Logging {
     
     var g = graph.mapVertices((vid, vdata) => vprog(vid, vdata, initialMsg)).cache()
     //debug
-    println("Initial graph nodes are : \n")
-    print(g.vertices.collect().mkString("\n"))
-    println(" \n")
+    //println("Initial graph nodes are : \n")
+    //print(g.vertices.collect().mkString("\n"))
+    //println(" \n")
     // compute the messages
     var messages = g.mapReduceTriplets(sendMsg, mergeMsg)
     var activeMessages = messages.count()
     //debug
-    println("First round messages are: \n")
-    print(messages.collect().mkString("\n"))
-    println("\n")
+    //println("First round messages are: \n")
+    //print(messages.collect().mkString("\n"))
+    //println("\n")
     // Loop
     var prevG: Graph[VD, ED] = null
     var i = 0
@@ -131,9 +131,9 @@ object Pregel extends Logging {
       // Receive the messages. Vertices that didn't get any messages do not appear in newVerts.
       val newVerts = g.vertices.innerJoin(messages)(vprog).cache()
       //debug
-      println("New verts are: \n")
-      print(newVerts.collect().mkString("\n"))
-      println("\n")
+      //println("New verts are: \n")
+      //print(newVerts.collect().mkString("\n"))
+      //println("\n")
 //     if (recordLongPregel != null && recordLongPregel.length() > 0 && recordLongPregel.toInt > 15 && i>=recordLongPregel.toInt) {
 //      //找出超大组
 //      val filePath = hdfsPath + "/" + recordLongPregelPath + "/nodes-round-" + i + "-"+ getNowDateShort()
@@ -146,9 +146,9 @@ object Pregel extends Logging {
       g = g.outerJoinVertices(newVerts) { (vid, old, newOpt) => newOpt.getOrElse(old) }
       g.cache()
       //debug
-      println("Graph nodes are : \n")
-      print(g.vertices.collect().mkString("\n"))
-      println(" \n")
+      //println("Graph nodes are : \n")
+      //print(g.vertices.collect().mkString("\n"))
+      //println(" \n")
       
       val oldMessages = messages
       // Send new messages. Vertices that didn't get any messages don't appear in newVerts, so don't
@@ -160,9 +160,9 @@ object Pregel extends Logging {
       // vertices of prevG (depended on by newVerts, oldMessages, and the vertices of g).
       activeMessages = messages.count()
       //debug
-      println("Messages are: \n")
-      print(messages.collect().mkString("\n"))
-      println("\n")
+      //println("Messages are: \n")
+      //print(messages.collect().mkString("\n"))
+      //println("\n")
       
 //     if (recordLongPregel != null && recordLongPregel.length() > 0 && recordLongPregel.toInt > 15 && i>=recordLongPregel.toInt) {
 //      //找出超大组

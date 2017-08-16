@@ -82,6 +82,12 @@ class UIDPairGraph(group: List[(String, String)]) {
         g += (v._1 -> neighbors)
         //println(v._1 + " has neighbors: " + neighbors.toList.toString())
 
+        if (v._1.length()<2) {
+          println(v._1 + " has neighbors: " + neighbors.toList.toString())
+          println( " graph is : " + g.toList.toString())
+          println( " group is : " + group.toList.toString())  
+        } 
+        
         val typ = v._1.substring(0, 2)
         typ match {
           case HGraphUtil.STR_ACCS_NUM => {
@@ -109,7 +115,8 @@ class UIDPairGraph(group: List[(String, String)]) {
             gEqu += (v._1 -> Set[String]())
           }
           case _ =>
-        }
+        }  
+
       }
 
     }

@@ -88,18 +88,23 @@ object GenUIDExtPair extends Logging{
     }
     r.toList
   }
-  
-  def apply(rddCnndGroup: RDD[(((Long, String), String), ((Long, String), String))], props: Properties): RDD[((Long, String), (Long, String))]= {
-    
+
+  def apply(rddCnndGroup: RDD[(((Long, String), String), ((Long, String), String))], props: Properties): RDD[((Long, String), (Long, String))] = {
+
     // (((s_vid,s_id),s_links),((e_vid,e_id), e_links))
-    val rddPairs = rddCnndGroup.flatMap { case (((s_vid,s_id),s_links),((e_vid,e_id), e_links)) => {
-       var pairGraph = expandPairToGraph( List((s_id, s_links), (e_id, e_links)))
-       if ( findTruePair(pairGraph)) {
-         List(((s_vid,s_id),(e_vid,e_id)))
-       } else {
-         List(((s_vid,s_id),(0L,"")),((e_vid,e_id),(0L,"")))
-       }
-      } 
+    val rddPairs = rddCnndGroup.flatMap {
+      case (((s_vid, s_id), s_links), ((e_vid, e_id), e_links)) => {
+        if (s_links.length() > 0 && e_links.length() > 0) {
+          var pairGraph = expandPairToGraph(List((s_id, s_links), (e_id, e_links)))
+          if (findTruePair(pairGraph)) {
+            List(((s_vid, s_id), (e_vid, e_id)))
+          } else {
+            List(((s_vid, s_id), (0L, "")), ((e_vid, e_id), (0L, "")))
+          }
+        } else {
+          List(((s_vid, s_id), (0L, "")), ((e_vid, e_id), (0L, "")))
+        }
+      }
     }
 
     rddPairs
