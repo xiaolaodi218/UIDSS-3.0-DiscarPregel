@@ -215,94 +215,100 @@ class UIDPairGraph(group: List[(String, String)]) {
 
   //根据规则确定是否是同一用户的
   private def isSameUserNew(vSrc: String, vDst: String, idLnks: Set[String]) = {
-    var iQQ = 0
-    var iTDID = 0
-    var iID = 0
-    var iCI = 0
 
-    var iSrcHasQQ = hasQQNeighbor(vSrc)
-    var iDstHasQQ = hasQQNeighbor(vDst)
-
-    var sID = ""
-    var sCust_ID = ""
-
-    val styp = vSrc.substring(0, 2)
-    val dtyp = vDst.substring(0, 2)
-
-    //至少需要有一个移动号, 才能比较. 宽带号(可以属于多个用户)之间暂不考虑
-    if (styp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0
-      || dtyp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
-
-      for (vInter <- idLnks) {
-        val typ = vInter.substring(0, 2)
-
-        typ match {
-          //移动号与移动号, 移动号与固话/宽带号之间可以通过QQ相等
-          case HGraphUtil.STR_QQ => {
-            iQQ = iQQ + 1
-          }
-          case "TDID" => {
-            iTDID = iTDID + 1
-          }
-          case HGraphUtil.STR_ID_NUM => {
-            //只有移动号与固话/宽带号之间可以通过ID相等
-            if (dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
-              || styp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
-              || dtyp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0
-              || styp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0) {
-              iID = iID + 1
-              sID = vInter
-            }
-          }
-          case HGraphUtil.STR_CUST_ID => {
-            //只有移动号与固话/宽带号之间可以通过客户ID相等
-            if (dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
-              || styp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
-              || dtyp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0
-              || styp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0) {
-              iCI = iCI + 1
-              sCust_ID = vInter
-            }
-          }
-          case _ =>
-        }
-      }
-    }
-
-    var iweight = 0
-
-    if (iQQ > 0) {
-      //IF网络账号(QQ/TDID)相同
-      //IF[
-      //(客户ID相同 and (身份证相同 | 身份证号为空) and (移动接入号码非空))|
-      //((客户ID不同 and 身份证号相同 and (移动接入号码不同 and 固网接入号码相同)) |
-      //((客户ID不同 and 身份证号为空 and (移动接入号码不同 | (移动接入号码相同 and 固网接入号码不同))) |
-      //( 客户ID不同 and 身份证号不同 and ((移动接入号码不同 and (固网接入号码不同 |固网接入号码空)) | (移动接入号码相同 and固网接入号码不同))) |
-      //(客户ID不同 and身份证号不同 and ((移动号码不同) | (移动接入号码相同 and 固网接入号码不同))) |
-      //(客户ID不同 and身份证号相同 and移动号码不同 and固网接入号码不同) |
-      //[客户ID不同 and 身份证号相同 and移动接入号码不同 and 固网接入号码为空] |
-      //(客户ID不同 and身份证号空 and ((移动接入号码相同 and 固网接入号码非空) | (移动接入号码不同 and (固网接入号码为空 | 固网接入号码不同))))
-      //]
-      iweight = 1
+    if (vSrc.substring(2).compareTo(vDst.substring(2)) == 0) { //固话号与宽带号相同的情景   
+      true
     } else {
-      //没有网络帐号(QQ/TDID)
-      //IF[(归属城市标识相同 and客户ID相同 and 身份证号码相同 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空)) |
-      //(归属城市标识相同 and客户ID相同 and 身份证号码空 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空))
-      //]
-      //		生成唯一UID
-      if (iSrcHasQQ < 1 && iDstHasQQ < 1) {
-        if ((iCI == 1 && countMobileNeighbors(sCust_ID) == 1)
-          && ((iID == 1 && countMobileNeighbors(sID) == 1) || (iID == 0))) {
-          iweight = 1
-        } else {
-          if ((iCI == 0) && (iID == 1 && countMobileNeighbors(sID) == 1)) {
-            iweight = 1
+      var iQQ = 0
+      var iTDID = 0
+      var iID = 0
+      var iCI = 0
+
+      var iSrcHasQQ = hasQQNeighbor(vSrc)
+      var iDstHasQQ = hasQQNeighbor(vDst)
+
+      var sID = ""
+      var sCust_ID = ""
+
+      val styp = vSrc.substring(0, 2)
+      val dtyp = vDst.substring(0, 2)
+
+      //至少需要有一个移动号, 才能比较. 宽带号(可以属于多个用户)之间暂不考虑
+      if (styp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0
+        || dtyp.compareToIgnoreCase(HGraphUtil.STR_MBL_NUM) == 0) {
+
+        for (vInter <- idLnks) {
+          val typ = vInter.substring(0, 2)
+
+          typ match {
+            //移动号与移动号, 移动号与固话/宽带号之间可以通过QQ相等
+            case HGraphUtil.STR_QQ => {
+              iQQ = iQQ + 1
+            }
+            case "TDID" => {
+              iTDID = iTDID + 1
+            }
+            case HGraphUtil.STR_ID_NUM => {
+              //只有移动号与固话/宽带号之间可以通过ID相等
+              if (dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
+                || styp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
+                || dtyp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0
+                || styp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0) {
+                iID = iID + 1
+                sID = vInter
+              }
+            }
+            case HGraphUtil.STR_CUST_ID => {
+              //只有移动号与固话/宽带号之间可以通过客户ID相等
+              if (dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
+                || styp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
+                || dtyp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0
+                || styp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0) {
+                iCI = iCI + 1
+                sCust_ID = vInter
+              }
+            }
+            case _ =>
           }
         }
       }
+
+      var iweight = 0
+
+      if (iQQ > 0) {
+        //IF网络账号(QQ/TDID)相同
+        //IF[
+        //(客户ID相同 and (身份证相同 | 身份证号为空) and (移动接入号码非空))|
+        //((客户ID不同 and 身份证号相同 and (移动接入号码不同 and 固网接入号码相同)) |
+        //((客户ID不同 and 身份证号为空 and (移动接入号码不同 | (移动接入号码相同 and 固网接入号码不同))) |
+        //( 客户ID不同 and 身份证号不同 and ((移动接入号码不同 and (固网接入号码不同 |固网接入号码空)) | (移动接入号码相同 and固网接入号码不同))) |
+        //(客户ID不同 and身份证号不同 and ((移动号码不同) | (移动接入号码相同 and 固网接入号码不同))) |
+        //(客户ID不同 and身份证号相同 and移动号码不同 and固网接入号码不同) |
+        //[客户ID不同 and 身份证号相同 and移动接入号码不同 and 固网接入号码为空] |
+        //(客户ID不同 and身份证号空 and ((移动接入号码相同 and 固网接入号码非空) | (移动接入号码不同 and (固网接入号码为空 | 固网接入号码不同))))
+        //]
+        iweight = 1
+      } else {
+        //没有网络帐号(QQ/TDID)
+        //IF[(归属城市标识相同 and客户ID相同 and 身份证号码相同 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空)) |
+        //(归属城市标识相同 and客户ID相同 and 身份证号码空 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空))
+        //]
+        //		生成唯一UID
+        if (iSrcHasQQ < 1 && iDstHasQQ < 1) {
+          if ((iCI == 1 && countMobileNeighbors(sCust_ID) == 1)
+            && ((iID == 1 && countMobileNeighbors(sID) == 1) || (iID == 0))) {
+            iweight = 1
+          } else {
+            if ((iCI == 0) && (iID == 1 && countMobileNeighbors(sID) == 1)) {
+              iweight = 1
+            }
+          }
+        }
+      }
+
+      iweight >= 1
     }
 
-    iweight >= 1
   }
 
   //是否有QQ邻居节点

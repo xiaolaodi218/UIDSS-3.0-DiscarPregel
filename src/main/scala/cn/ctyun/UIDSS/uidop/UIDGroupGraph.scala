@@ -48,20 +48,8 @@ class UIDGroupGraph(group: List[(String, String)]) {
 
   def getSize(): Int = {
     g.size
-  }
-
-  def getBigestNode(): String = {
-    var bn = ""
-    var bs = 0
-    for (nod <- g) {
-      if (bs < nod._2.size) {
-        bs = nod._2.size
-        bn = nod._1
-      }
-    }
-    bn
-  }
-
+  }  
+  
   /*  init :  初始化图，并找出号码
  *  		1. 所有节点放到图(即邻接数组)中 g
  *  		2.以号码为中心，拆开连通图，形成号码级用户 ans
@@ -75,9 +63,6 @@ class UIDGroupGraph(group: List[(String, String)]) {
     }
     
     for (v <- group) {
-      //      if ("QQ974834277".compareToIgnoreCase(v._1) == 0) {
-      //        needPrint = true
-      //      }
       //1.所有节点放到图(即邻接数组)中
       
       val fields = v._2.split(";")
@@ -139,24 +124,13 @@ class UIDGroupGraph(group: List[(String, String)]) {
 
     //println("******************** UIDGraph.getUID ************************")
 
-    //0.找出超级ID单独放在表中
-
-//    //1.按（QQ，TDID）等ID信息，连接同一用户的号码，并保存在 gEqu
-//    findEqualANPair()
-//    //println("findEqualANPair(), map gEqu: " + gEqu.toString())
-//
-//    //2.把同一用户的号码放在同一组，也就是独立用户( 包括1个或多个号码级用户合并的结果)
-//    val angroups = getANGroups()
-//    //println("getANGroups(), angroups is : " + angroups.toString())
-
     //3.找出或生成用户号码组的UID（QQ，TDID>号码 > 新生成）
     var vVisitied = Set[String]()
     var uidsUsed = Set[String]()
     var group = ans.toSet
     val lstEdgeWithUid = getPreferUID(vVisitied, uidsUsed)
     List(lstEdgeWithUid) 
-  }
-  
+  }  
 
   /*3.找出或生成用户号码组的UID（QQ，TDID>号码 > 新生成）
    * @groupset	 用户的所有电话号码		
@@ -179,35 +153,6 @@ class UIDGroupGraph(group: List[(String, String)]) {
           case HGraphUtil.STR_UD => {
             uidAN = vID
           }
-          //不是ID节点, 则进一步搜索连接的节点
-          case HGraphUtil.STR_QQ => {
-            //只有与移动号相邻的QQ才参与UID生成
-            //if (an.substring(0, 2).compareTo(HGraphUtil.STR_MBL_NUM) == 0) {
-            if (an.substring(0, 2).compareTo(HGraphUtil.STR_MBL_NUM) == 0
-                ||an.substring(0, 2).compareTo(HGraphUtil.STR_WB_NUM) == 0) {
-              val lnks2nd = g.getOrElse(vID, Set[String]())
-              //与ID节点相邻的所有节点
-              for (vIDLnk <- lnks2nd) {
-                val typ2 = vIDLnk.substring(0, 2)
-                typ2 match {
-                  //是UID节点, 则记为ID节点的UID
-                  case HGraphUtil.STR_UD => {
-                    //ＱＱ节点连接的ＵＩＤ
-                    if (!vVisitied.contains(vID)) {
-                      vVisitied += vID
-                      lstbufUIDs += ((vID, vIDLnk))
-                    }
-                  }
-                  case _ =>
-                }
-              }
-              //QQ如果没有关联的UID,则加入空. 因为所有标识节点都应该保存在lstbufUIDs,哪怕是空的.
-              if (!vVisitied.contains(vID)) {
-                vVisitied += vID
-                lstbufUIDs += ((vID, ""))
-              }
-            }
-          }
           case _ =>
         }
       }
@@ -228,9 +173,6 @@ class UIDGroupGraph(group: List[(String, String)]) {
         //与不同类型节点相连的UID权重是不同的
         val typ = vertex._1.substring(0, 2)
         typ match {
-          case HGraphUtil.STR_QQ       => { count += GenUIDExt.UID_PRIOR_QQ }
-          //          case HGraphUtil.STR_CUST_ID  => count += GenUIDExt.UID_PRIOR_CI
-          //          case HGraphUtil.STR_ID_NUM   => count += GenUIDExt.UID_PRIOR_ID
           case HGraphUtil.STR_MBL_NUM  => count += (GenUIDExt.UID_PRIOR_MN)
           case HGraphUtil.STR_ACCS_NUM => count += (GenUIDExt.UID_PRIOR_AN)
           case HGraphUtil.STR_WB_NUM   => count += (GenUIDExt.UID_PRIOR_WN)

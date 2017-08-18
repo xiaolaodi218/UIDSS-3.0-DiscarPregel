@@ -40,12 +40,12 @@ import cn.ctyun.UIDSS.utils.{ Utils, Logging }
  */
 object GenUIDExt extends Logging{
 
-  var UID_PRIOR_QQ = 2
+  var UID_PRIOR_QQ = 3
   var UID_PRIOR_ID = 1
   var UID_PRIOR_CI = 1
   var UID_PRIOR_AN = 1
   var UID_PRIOR_WN = 1
-  var UID_PRIOR_MN = 2
+  var UID_PRIOR_MN = 3
   
   def getUID(group: List[(String, String)]): Iterable[(String, List[(String, String)])] = {
 

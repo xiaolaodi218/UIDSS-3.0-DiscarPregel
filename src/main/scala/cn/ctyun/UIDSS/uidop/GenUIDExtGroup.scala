@@ -40,24 +40,19 @@ import cn.ctyun.UIDSS.utils.{ Utils, Logging }
  */
 object GenUIDExtGroup extends Logging{
 
-  var UID_PRIOR_QQ = 2
+  var UID_PRIOR_QQ = 3
   var UID_PRIOR_ID = 1
   var UID_PRIOR_CI = 1
   var UID_PRIOR_AN = 1
   var UID_PRIOR_WN = 1
-  var UID_PRIOR_MN = 2
+  var UID_PRIOR_MN = 3
   
   def getUID(group: List[(String, String)]): Iterable[(String, List[(String, String)])] = {
 
     //println("********************  GenUIDExt.getUID ***************************")
-    val uidGraph = UIDGroupGraph(group)
+    val uidGroupGraph = UIDGroupGraph(group)
 
-    if (uidGraph.getSize() > 0) {
-      if (uidGraph.getSize() > 1000) {
-         println(getNowDate() + " ****** get graph has " +  uidGraph.getSize()  +" nodes. Bigest nodes is " + uidGraph.getBigestNode()  +"  ****** "  )   
-         ListBuffer[(String, List[(String, String)])]()
-      }
-      else {
+    if (uidGroupGraph.getSize() > 0) {
       //生成连接子图，也就是独立用户
       //以号码为中心，拆开连通图，形成号码级用户
       //按（QQ，TDID）等ID信息合并号码级用户
@@ -70,8 +65,7 @@ object GenUIDExtGroup extends Logging{
       //因为所有信息是以号码为中心保存的,按UID查询时, 只要按照号码查就行.
       //而qq等保存UID，是为了保持稳定性.
       //(新UID： String, List[(节点：String, 原UID： String)])   
-      uidGraph.getUID()
-      }
+      uidGroupGraph.getUID()
     } else {
       //println("********************  GenUIDExt.getUID:  No elements in this graph. ********************")
       ListBuffer[(String, List[(String, String)])]()
@@ -131,12 +125,6 @@ object GenUIDExtGroup extends Logging{
     //println("rddCnndGroup is " + rddCnndGroup.collect().mkString("\n"))
     println(getNowDate() + " ****** getUID()   ******")   
     
-//    val rddPrint = rddCnndGroup.flatMap {
-//      case (group) => {
-//        //println("group is tested " + group.mkString("\n"));
-//        List(0, 0, 1)
-//      }
-//    }
     //println("rddPrint is " + rddPrint.count())
 
     val rddVtoVwithSN = rddCnndGroup.flatMap { 
