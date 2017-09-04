@@ -48,13 +48,13 @@ object PregelGenUIDFindGroups {
     
     //分情况取出边的两端的最小ID
     //其中：宽带与宽带之间直接相连的情况已经在前面过滤掉.
-    if (0== HGraphUtil.STR_WB_NUM.compareTo(srcType) ) { //src是宽带节点
+    if (0== HGraphUtil.STR_WB_NUM.compareTo(srcType) || 0== HGraphUtil.STR_ACCS_NUM.compareTo(srcType)) { //src是宽带节点
         val neighbor = srcNeighbors.find({_._1==edge.dstId})
         if (neighbor != None) {
           srcMinID = neighbor.get._2
         }
     }
-    else if (0== HGraphUtil.STR_WB_NUM.compareTo(dstType)) { //dst是宽带节点
+    else if (0== HGraphUtil.STR_WB_NUM.compareTo(dstType)|| 0== HGraphUtil.STR_ACCS_NUM.compareTo(dstType)) { //dst是宽带节点
         val neighbor = dstNeighbors.find({_._1==edge.srcId})
         if (neighbor != None) {
           dstMinID = neighbor.get._2
@@ -76,12 +76,12 @@ object PregelGenUIDFindGroups {
     //分情况取出边的两端的最小ID
     //其中：宽带与宽带之间直接相连的情况已经在前面过滤掉.
     //宽带号不应该广播自己。其它节点一直往宽带号广播。直到对应ID相等。
-    if (0== HGraphUtil.STR_WB_NUM.compareTo(srcType) ) { //src是宽带节点
+    if (0== HGraphUtil.STR_WB_NUM.compareTo(srcType) || 0== HGraphUtil.STR_ACCS_NUM.compareTo(srcType)) { //src是宽带节点
         dst = edge.srcId
         src = edge.dstId
         v = dstMinID
     }
-    else if (0== HGraphUtil.STR_WB_NUM.compareTo(dstType)) { //dst是宽带节点
+    else if (0== HGraphUtil.STR_WB_NUM.compareTo(dstType) || 0== HGraphUtil.STR_ACCS_NUM.compareTo(dstType)) { //dst是宽带节点
         dst = edge.dstId
         src = edge.srcId
         v = srcMinID
@@ -129,7 +129,7 @@ object PregelGenUIDFindGroups {
         if (msg._2 < minimal) { minimal = msg._2 }
       }
       
-      if (HGraphUtil.STR_WB_NUM.compareTo(value._1) != 0) { //非宽带节点
+      if (HGraphUtil.STR_WB_NUM.compareTo(value._1) != 0 && HGraphUtil.STR_ACCS_NUM.compareTo(value._1) != 0) { //非宽带节点
         //println(value._1 + " is assigned " + (message min value._2) + " , message is " + message )
         (value._1, (value._2._1 min minimal, value._2._2)) //记下最小的节点序号         
       } 

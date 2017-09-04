@@ -183,7 +183,7 @@ object GenUID3Cmd extends Logging {
         buf.toIterable
       }      
     }
-    println("rddLonelyCN: \n " + rddLonelyCN.collect().mkString("\n"))             
+    //println("rddLonelyCN: \n " + rddLonelyCN.collect().mkString("\n"))             
    
      /******** 四、找出最终的有效号码对 *******/      
     //为起点找到其编码及所有邻接点
@@ -262,7 +262,7 @@ object GenUID3Cmd extends Logging {
           buf.toIterable
         }
       } .distinct().subtract(rddPaired)
-     println("rddNotPaired: \n" + rddNotPaired.collect().mkString("\n"))       
+     //println("rddNotPaired: \n" + rddNotPaired.collect().mkString("\n"))       
 
      
      val graphPairs = Graph(rddGroupVertex, rddGroupEdge, null, StorageLevel.MEMORY_AND_DISK, StorageLevel.MEMORY_AND_DISK)    
@@ -270,7 +270,7 @@ object GenUID3Cmd extends Logging {
      /******** 六、找出图中所有通信号码所属group *******/    
     //	pregel 获得 关联的组
     val graphGroup = PregelGenUIDFindGroups(graphPairs, 2, props)
-    println("graphGroup.vertices: \n" + graphGroup.vertices.collect().mkString("\n")) 
+    //println("graphGroup.vertices: \n" + graphGroup.vertices.collect().mkString("\n")) 
     //println("graphGroup.edges : \n" + graphGroup.edges.collect().mkString("\n")) 
     
     //需要扩展多连接的节点到多个组
@@ -292,7 +292,7 @@ object GenUID3Cmd extends Logging {
         verts.toIterable
       }
     }     
-    println("rddVerticesExt group:  \n" + rddVerticesExt.collect().mkString("\n"))      
+    //println("rddVerticesExt group:  \n" + rddVerticesExt.collect().mkString("\n"))      
     
     //graphx中的点还原为 邻接表节点
     val rddLinksJoinVerts = HtoXGenUID.rddVidtoLinks.join(rddVerticesExt)
@@ -305,7 +305,7 @@ object GenUID3Cmd extends Logging {
     }    
     //找出属于同一组的节点
     var rddCnndGroup = rddCnndInId.groupByKey().map { case (v) => v._2.toList }
-    println("rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
+    //println("rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
     
      //还需要需要加入孤立节点
      rddLonelyCN = rddLonelyCN.++(rddNotPaired)
@@ -320,14 +320,14 @@ object GenUID3Cmd extends Logging {
         buf.toIterable
       }
     }    
-    println("rddLonelyGroup is:  \n " + rddLonelyGroup.collect().mkString("\n")) 
+    //println("rddLonelyGroup is:  \n " + rddLonelyGroup.collect().mkString("\n")) 
     //println("HtoXGenUID.rddVidtoLinks is:  \n " +HtoXGenUID.rddVidtoLinks.collect().mkString("\n")) 
      
     
     
     //所有的组
     rddCnndGroup = rddCnndGroup.++(rddLonelyGroup)
-    println("New rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
+    //println("New rddCnndGroup is:  \n " + rddCnndGroup.collect().mkString("\n"))
 
      
     /******** 七、UID生成 *******/

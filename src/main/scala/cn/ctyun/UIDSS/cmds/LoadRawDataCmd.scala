@@ -62,11 +62,15 @@ object LoadRawDataCmd extends Logging{
         //println("rddNewRelations is:  \n" + rddNew.collect().mkString("\n"))
 
         if (!oldData.isEmpty() && oldData.compareToIgnoreCase("0")!=0) {
-          val rddOld = UIDInfoWB(sc, hdfsPath + oldData, "1", lant_id)
+          //再分区提高并行度
+          val rddNewRepart= rddNew.repartition(30)
+          val rddOld = UIDInfoWB(sc, hdfsPath + oldData, "1", lant_id).repartition(30)
           //println("rddOldRelations is:  \n" + rddOld.collect().mkString("\n"))
-
-          val rddDiff = FindDiff(rddOld, rddNew)
-
+//          val cntOld = rddOld.count()
+//          info(" ******  Read " + cntOld + " rows from HBase ******")       
+         
+          var rddDiff = FindDiff(rddOld, rddNewRepart)
+          
           //保存UID生成结果到HBase
           //row  ((行，列)，值）)
           HBaseIO.saveToGraphTable(sc, props, rddDiff)
@@ -81,10 +85,12 @@ object LoadRawDataCmd extends Logging{
         //println("rddNewRelations is:  \n" + rddNew.collect().mkString("\n"))
 
         if (!oldData.isEmpty() && oldData.compareToIgnoreCase("0")!=0 ) {
-          val rddOld = UIDInfoTEL(sc, hdfsPath + oldData, "1", lant_id)
+          //再分区提高并行度
+          val rddNewRepart= rddNew.repartition(30)
+          val rddOld = UIDInfoTEL(sc, hdfsPath + oldData, "1", lant_id).repartition(30)
           //println("rddOldRelations is:  \n" + rddOld.collect().mkString("\n"))
-
-          val rddDiff = FindDiff(rddOld, rddNew)
+          
+          var rddDiff = FindDiff(rddOld, rddNewRepart)
 
           //保存UID生成结果到HBase
           //row  ((行，列)，值）)
