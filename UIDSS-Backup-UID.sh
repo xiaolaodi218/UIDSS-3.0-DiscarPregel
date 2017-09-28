@@ -10,6 +10,7 @@ echo ${_readIni}
 }
 
 baseDirForScriptSelf=$(cd "$(dirname "$0")"; pwd)
+cd ${baseDirForScriptSelf}
 
 hbase_user_space=$(__readINI UIDSS-Shell.ini BackUp hbase_user_space)
 
