@@ -50,6 +50,9 @@ object DPIInfoMBL extends Logging{
    *9  	jd账号	jd_ID	STRING	如存在对应多个网络账号，取出现频次最高的账号	　
    *10  IDFA	IDFA	STRING	　	　
    *11  AndroidID	AndroidID	STRING
+   *12		WeChat WeChat	STRING
+   *13		MAC MAC	STRING
+   *14		IMEI IMEI	STRING     
   */
 
   def convert(line: String): Iterable[((String, String), String)] = {
@@ -70,6 +73,9 @@ object DPIInfoMBL extends Logging{
       val jd_ID = fields(9);
       val IDFA = fields(10);
       val AndroidID = fields(11);
+      val WeChat = fields(12);
+      val MAC = fields(13);
+      val IMEI = fields(14);      
 
       if (null != MDN && MDN.length() > 7 && MDN.length() < 100) {
 
@@ -138,6 +144,24 @@ object DPIInfoMBL extends Logging{
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_AndroidID + AndroidID), weight))
           buf += (((HGraphUtil.STR_AndroidID + AndroidID, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }          
+
+        // 添加微信号与手机号关系			
+        if (null != WeChat && WeChat.length() >= 5 && WeChat.length() < 100) {
+          buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_WE_CHAT + WeChat), weight))
+          buf += (((HGraphUtil.STR_WE_CHAT  + WeChat, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
+        }         
+
+        // 添加MAC与手机号关系			
+        if (null != MAC && MAC.length() >= 5 && MAC.length() < 100) {
+          buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MAC + MAC), weight))
+          buf += (((HGraphUtil.STR_MAC  + MAC, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
+        }   
+        
+        // 添加IMEI与手机号关系			
+        if (null != IMEI && IMEI.length() >= 5 && IMEI.length() < 100) {
+          buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_IMEI + IMEI), weight))
+          buf += (((HGraphUtil.STR_IMEI  + IMEI, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
+        }           
         count += 1
       }
     } catch {

@@ -113,6 +113,7 @@ object HtoXGenUID extends Logging {
           if (iNeighbors > 10 || iMN>1 || iWN > 1) bNeedProcess = false 
       }
       case HGraphUtil.STR_QQ       => { if (iNeighbors > 10) { bNeedProcess = false } }
+      case HGraphUtil.STR_WE_CHAT       => { if (iNeighbors > 10) { bNeedProcess = false } }
       //手机号关联比较多    9(+有多个ME) + 11(9 与IT侧有2重)  + UID
       case HGraphUtil.STR_MBL_NUM  => { if (iNeighbors > 30) bNeedProcess = false }
       //宽带号关联比较多  5 + 33 + 多个UID(网络,CI, ID关联的)
@@ -154,10 +155,19 @@ object HtoXGenUID extends Logging {
           case _                      => bNeedProcess = false
         }
       }
+       case HGraphUtil.STR_WE_CHAT=> {
+        dstType match {
+          case HGraphUtil.STR_MBL_NUM => bNeedProcess = true
+          case HGraphUtil.STR_WB_NUM  => bNeedProcess = true
+          case HGraphUtil.STR_UD      => bNeedProcess = true
+          case _                      => bNeedProcess = false
+        }
+      }
       //手机号关联
       case HGraphUtil.STR_MBL_NUM => {
         dstType match {
           case HGraphUtil.STR_QQ      => bNeedProcess = true
+          case HGraphUtil.STR_WE_CHAT      => bNeedProcess = true          
           case HGraphUtil.STR_CUST_ID => bNeedProcess = true
           case HGraphUtil.STR_ID_NUM  => bNeedProcess = true
           case HGraphUtil.STR_IMSI    => bNeedProcess = true
@@ -169,6 +179,7 @@ object HtoXGenUID extends Logging {
       case HGraphUtil.STR_WB_NUM => {
         dstType match {
           case HGraphUtil.STR_QQ      => bNeedProcess = true
+          case HGraphUtil.STR_WE_CHAT      => bNeedProcess = true          
           case HGraphUtil.STR_CUST_ID => bNeedProcess = true
           case HGraphUtil.STR_ID_NUM  => bNeedProcess = true
           case HGraphUtil.STR_UD      => bNeedProcess = true
@@ -191,6 +202,7 @@ object HtoXGenUID extends Logging {
           case HGraphUtil.STR_WB_NUM   => bNeedProcess = true
           case HGraphUtil.STR_MBL_NUM  => bNeedProcess = true
           case HGraphUtil.STR_QQ       => bNeedProcess = true
+          case HGraphUtil.STR_WE_CHAT       => bNeedProcess = true
           case _                       => bNeedProcess = false
         }
       }

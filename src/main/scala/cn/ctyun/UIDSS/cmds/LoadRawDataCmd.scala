@@ -63,8 +63,8 @@ object LoadRawDataCmd extends Logging{
 
         if (!oldData.isEmpty() && oldData.compareToIgnoreCase("0")!=0) {
           //再分区提高并行度
-          val rddNewRepart= rddNew.repartition(30)
-          val rddOld = UIDInfoWB(sc, hdfsPath + oldData, "1", lant_id).repartition(30)
+          val rddNewRepart= rddNew    //.repartition(30)
+          val rddOld = UIDInfoWB(sc, hdfsPath + oldData, "1", lant_id)  //.repartition(30)
           //println("rddOldRelations is:  \n" + rddOld.collect().mkString("\n"))
 //          val cntOld = rddOld.count()
 //          info(" ******  Read " + cntOld + " rows from HBase ******")       

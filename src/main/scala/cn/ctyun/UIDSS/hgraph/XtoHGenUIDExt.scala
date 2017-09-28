@@ -41,6 +41,7 @@ object XtoHGenUIDExt {
           || typ.compareTo(HGraphUtil.STR_MBL_NUM) == 0
           || typ.compareTo(HGraphUtil.STR_WB_NUM) == 0
           || typ.compareTo(HGraphUtil.STR_QQ) == 0
+          || typ.compareTo(HGraphUtil.STR_WE_CHAT) == 0
           || typ.compareTo(HGraphUtil.STR_CUST_ID) == 0
           || typ.compareTo(HGraphUtil.STR_ID_NUM) == 0))) {
 

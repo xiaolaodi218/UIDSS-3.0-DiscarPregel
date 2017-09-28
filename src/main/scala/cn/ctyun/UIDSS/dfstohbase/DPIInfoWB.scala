@@ -75,6 +75,13 @@ object DPIInfoWB extends Logging{
    *34   AndroidID1	AndroidID	STRING	　	　
    *35   AndroidID2	AndroidID	STRING	　	　
    *36   AndroidID3	AndroidID	STRING
+   *37   WeChat1 	微信号1		STRING	　	　
+   *38   WeChat2		微信号2 		STRING	　	　
+   *39   WeChat3		微信号3 		STRING
+   *40   MAC1				MAC地址1 		STRING	　	　
+   *41   MAC2				MAC地址2 		STRING	　	　
+   *42   MAC3				MAC地址3 		STRING
+   *43		 IIM          IMSI + IMEI + MAC  STRING  
    */
 
   def convert(line: String): Iterable[((String, String), String)] = {
@@ -120,6 +127,14 @@ object DPIInfoWB extends Logging{
       val AndroidID1 = fields(34);
       val AndroidID2 = fields(35);
       val AndroidID3 = fields(36);
+      val WeChat1 = fields(37);
+      val WeChat2 = fields(38);
+      val WeChat3 = fields(39);
+      val MAC1 = fields(40);
+      val MAC2 = fields(41);
+      val MAC3 = fields(42);
+      val IIM = fields(43);
+      
 
       if (null != WB_Num && WB_Num.length() > 7 && WB_Num.length() < 100) {
 
@@ -290,6 +305,42 @@ object DPIInfoWB extends Logging{
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_AndroidID + AndroidID3), weight))
           buf += (((HGraphUtil.STR_AndroidID + AndroidID3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
+
+        // 添加微信号与宽带号关系			
+        if (null != WeChat1 && WeChat1.length() >= 5 && WeChat1.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WE_CHAT + WeChat1), weight))
+          buf += (((HGraphUtil.STR_WE_CHAT  + WeChat1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+        if (null != WeChat2 && WeChat2.length() >= 5 && WeChat2.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WE_CHAT  + WeChat2), weight))
+          buf += (((HGraphUtil.STR_WE_CHAT  + WeChat2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+        if (null != WeChat3 && WeChat3.length() >= 5 && WeChat3.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WE_CHAT  + WeChat3), weight))
+          buf += (((HGraphUtil.STR_WE_CHAT  + WeChat3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+
+        // 添加MAC与宽带号关系			
+        if (null != MAC1 && MAC1.length() >= 5 && MAC1.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MAC + MAC1), weight))
+          buf += (((HGraphUtil.STR_MAC  + MAC1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+        if (null != MAC2 && MAC2.length() >= 5 && MAC2.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MAC  + MAC2), weight))
+          buf += (((HGraphUtil.STR_MAC  + MAC2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+        if (null != MAC3 && MAC3.length() >= 5 && MAC3.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MAC  + MAC3), weight))
+          buf += (((HGraphUtil.STR_MAC  + MAC3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }        
+        
+        // 添加IIM与宽带号关系			
+        if (null != IIM && IIM.length() >= 5 && IIM.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IIM + IIM), weight))
+          buf += (((HGraphUtil.STR_IIM  + IIM, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+
+        
         count += 1
       }
     } catch {

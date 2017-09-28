@@ -220,13 +220,15 @@ class UIDPairGraph(group: List[(String, String)]) {
       true
     } else {
       var iQQ = 0
-      var iTDID = 0
+      var iWeChat = 0
       var iID = 0
       var iCI = 0
 
       var iSrcHasQQ = hasQQNeighbor(vSrc)
       var iDstHasQQ = hasQQNeighbor(vDst)
-
+      var iSrcHasWeChat = hasWeChatNeighbor(vSrc)
+      var iDstHasWeChat = hasWeChatNeighbor(vDst)
+      
       var sID = ""
       var sCust_ID = ""
 
@@ -245,8 +247,8 @@ class UIDPairGraph(group: List[(String, String)]) {
             case HGraphUtil.STR_QQ => {
               iQQ = iQQ + 1
             }
-            case "TDID" => {
-              iTDID = iTDID + 1
+            case HGraphUtil.STR_WE_CHAT => {
+              iWeChat = iWeChat + 1
             }
             case HGraphUtil.STR_ID_NUM => {
               //只有移动号与固话/宽带号之间可以通过ID相等
@@ -275,7 +277,7 @@ class UIDPairGraph(group: List[(String, String)]) {
 
       var iweight = 0
 
-      if (iQQ > 0) {
+      if (iQQ > 0 || iWeChat>0) {
         //IF网络账号(QQ/TDID)相同
         //IF[
         //(客户ID相同 and (身份证相同 | 身份证号为空) and (移动接入号码非空))|
@@ -294,7 +296,7 @@ class UIDPairGraph(group: List[(String, String)]) {
         //(归属城市标识相同 and客户ID相同 and 身份证号码空 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空))
         //]
         //		生成唯一UID
-        if (iSrcHasQQ < 1 && iDstHasQQ < 1) {
+        if (iSrcHasQQ < 1 && iDstHasQQ < 1 && iSrcHasWeChat < 1 && iDstHasWeChat < 1) {
           if ((iCI == 1 && countMobileNeighbors(sCust_ID) == 1)
             && ((iID == 1 && countMobileNeighbors(sID) == 1) || (iID == 0))) {
             iweight = 1
@@ -324,6 +326,19 @@ class UIDPairGraph(group: List[(String, String)]) {
     bHasQQ
   }
 
+    //是否有WeChat邻居节点
+  private def hasWeChatNeighbor(vSrc: String): Int = {
+    var bHasWeChat = 0
+    val lnks = g.getOrElse(vSrc, Set[String]())
+    for (vNeighbor <- lnks) {
+      val typ = vNeighbor.substring(0, 2)
+      if (typ.compareToIgnoreCase(HGraphUtil.STR_WE_CHAT) == 0) {
+        bHasWeChat = 1
+      }
+    }
+    bHasWeChat
+  }
+  
   //是否有多个移动号邻居节点
   private def countMobileNeighbors(vSrc: String): Int = {
     var iMobileNeighbors = 0

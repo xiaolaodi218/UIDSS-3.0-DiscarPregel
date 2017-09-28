@@ -61,6 +61,8 @@ public class HGraphUtil {
 	public static final String STR_JD_ID= "JI";  // 京东是 "JI"
 	public static final String STR_IDFA = "IA";  // IDFA是 "IA"
 	public static final String STR_AndroidID = "AD";  // AndroidID是 "AD"
+	public static final String STR_MAC= "MC"; //设备MAC地址
+	public static final String STR_IIM = "IM";  // IMEI + IMSI + MAC.
 	
 	public static final String STR_UD = "UD";  // UID是 "UD"
 	
@@ -88,7 +90,9 @@ public class HGraphUtil {
 	public static final byte[] BYTE_IDFA_AndroidID = {'I','A'};  // IDFA_AndroidID是 "IA"
 	public static final byte[] BYTE_IDFA = {'I','A'};  // IDFA是 "IA"
 	public static final byte[] BYTE_AndroidID = {'A','D'};  // AndroidID是 "AD"
-
+	public static final byte[] BYTE_MAC = {'M','C'};  // 设备MAC地址
+	public static final byte[] BYTE_IIM = {'I','M'};  // IMEI + IMSI + MAC.
+	
 	public static final byte[] BYTE_UID = {'U','D'};  // UID是 "UD"
 	
 	public static final byte[] BYTE_UID_BASE ={ 'b', 'a', 's', 'e' };;  // UID Base 列是 "base"
@@ -137,6 +141,8 @@ public class HGraphUtil {
 	public static final short CLMN_JD_ID= Bytes.toShort(BYTE_JD_ID);  // 京东是 "JI"
 	public static final short CLMN_IDFA =Bytes.toShort(BYTE_IDFA);  // IDFA是 "IA"
 	public static final short CLMN_AndroidID =Bytes.toShort(BYTE_AndroidID);  // AndroidID是 "AD"
+	public static final short CLMN_MAC = Bytes.toShort(BYTE_MAC);  // 设备MAC地址
+	public static final short CLMN_IIM = Bytes.toShort(BYTE_IIM);  // IMEI + IMSI + MAC.	
 	
 	public static final short CLMN_UID =Bytes.toShort(BYTE_UID);  // UID 是 "UD"
 	
