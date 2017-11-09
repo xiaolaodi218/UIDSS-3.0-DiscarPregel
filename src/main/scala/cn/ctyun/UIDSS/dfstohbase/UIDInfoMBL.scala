@@ -27,7 +27,6 @@ import cn.ctyun.UIDSS.utils.{Logging }
 
 object UIDInfoMBL extends Logging{
   var weight: String = "1"
-  var count =0
   
   def apply(sc: SparkContext, path: String, order: String, lant_id: String): RDD[((String, String), String)] = {
     val textFile = sc.textFile(path)
@@ -35,7 +34,6 @@ object UIDInfoMBL extends Logging{
 
     val result = textFile.flatMap(convert(_,lant_id))
     //println(result.collect().mkString("\n"))
-    //info("UIDInfoMBL processed " + count + " lines.")
     result
   }
     
@@ -65,6 +63,10 @@ object UIDInfoMBL extends Logging{
     try {
       val fields = line.split("\1",-1)
 
+      if (fields.length!=17) {
+        throw new RuntimeException("Table UID Info MBL has an incorrect fields length!")  
+      } 
+      else {
       var base = 0
       var LANT_ID = fields(base)    
       if (lant.length()>0) {
@@ -138,7 +140,7 @@ object UIDInfoMBL extends Logging{
           buf += (((HGraphUtil.STR_MBL_NUM + MBL_NBR,  HGraphUtil.STR_TABLE_UID_INFO_MBL + HGraphUtil.STR_ICCID + PROVIN_ID + ICCID), weight))
           buf += (((HGraphUtil.STR_ICCID + PROVIN_ID + ICCID,  HGraphUtil.STR_TABLE_UID_INFO_MBL + HGraphUtil.STR_MBL_NUM + MBL_NBR), weight))
         }
-        count += 1
+      }
       }
     } catch {
       case e: Exception =>

@@ -27,13 +27,12 @@ import cn.ctyun.UIDSS.utils.{Logging }
 
 object DPIInfoMBL extends Logging{
   var weight: String = "1"
-  var count =0
 
   def apply(sc: SparkContext, path: String, order: String): RDD[((String, String), String)] = {
     val textFile = sc.textFile(path)
     val result = textFile.flatMap(convert(_))
     //println(result.collect().mkString("\n"))
-    info("DPIInfoMBL processed " + count + " lines.")
+    //info("DPIInfoMBL processed " + count + " lines.")
     result
   }
 
@@ -58,6 +57,10 @@ object DPIInfoMBL extends Logging{
     try {
       val fields = line.split("\\|",-1)
 
+      if (fields.length!=12) {
+        throw new RuntimeException("Table DPI Info MBL has an incorrect fields length!")  
+      } 
+      else {      
       val MDN = fields(0);
       val IMSI = fields(1);
       val MEID = fields(2);
@@ -138,7 +141,7 @@ object DPIInfoMBL extends Logging{
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_AndroidID + AndroidID), weight))
           buf += (((HGraphUtil.STR_AndroidID + AndroidID, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }          
-        count += 1
+      }
       }
     } catch {
       case e: Exception =>

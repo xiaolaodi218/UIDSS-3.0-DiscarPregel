@@ -31,6 +31,10 @@ sleep 3
 
 hbase shell backup.hbaseshell
 
+sleep 3
+
+rm backup.hbaseshell
+
 
 
 

@@ -27,7 +27,6 @@ import cn.ctyun.UIDSS.utils.{ Logging }
 
 object UIDInfoTEL extends Logging {
   var weight: String = "1"
-  var count = 0
 
   def apply(sc: SparkContext, path: String, order: String, lant_id: String): RDD[((String, String), String)] = {
     val textFile = sc.textFile(path)
@@ -83,6 +82,11 @@ object UIDInfoTEL extends Logging {
 //        CUST_ID = fields(4);
 //        ACCT_ID = fields(6);
 //      }
+      
+      if (fields.length!=7) {
+        throw new RuntimeException("Table UID Info TEL has an incorrect fields length!")  
+      } 
+      else {
 
       var base = 0
       var LANT_ID = ""  
@@ -123,7 +127,7 @@ object UIDInfoTEL extends Logging {
           buf += (((HGraphUtil.STR_ACCS_NUM + ACCS_NBR, HGraphUtil.STR_TABLE_UID_INFO_TEL + HGraphUtil.STR_ACCT_ID+ LANT_ID + ACCT_ID), weight))
           buf += (((HGraphUtil.STR_ACCT_ID+ LANT_ID + ACCT_ID, HGraphUtil.STR_TABLE_UID_INFO_TEL + HGraphUtil.STR_ACCS_NUM + ACCS_NBR), weight))
         }
-        count += 1
+      }
       }
     } catch {
       case e: Exception =>
