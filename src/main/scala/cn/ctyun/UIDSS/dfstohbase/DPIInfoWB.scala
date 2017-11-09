@@ -27,13 +27,12 @@ import cn.ctyun.UIDSS.utils.{Logging }
 
 object DPIInfoWB extends Logging{
   var weight: String = "1"
-  var count =0  
 
   def apply(sc: SparkContext, path: String, order: String): RDD[((String, String), String)] = {
     val textFile = sc.textFile(path)
     val result = textFile.flatMap(convert(_))
     //println(result.collect().mkString("\n"))
-    info("UIDSS: DPIInfoWB processed " + count + " lines.")
+    //info("UIDSS: DPIInfoWB processed " + count + " lines.")
     result
   }
 
@@ -89,6 +88,11 @@ object DPIInfoWB extends Logging{
 
     try {
       val fields = line.split("\\|",-1)
+      
+      if (fields.length!=44) {
+        throw new RuntimeException("Table DPI Info WB has an incorrect fields length!")  
+      } 
+      else {
 
       val WB_Num = fields(0);
       val QQ1 = fields(1);
@@ -342,6 +346,7 @@ object DPIInfoWB extends Logging{
 
         
         count += 1
+      }
       }
     } catch {
       case e: Exception =>
