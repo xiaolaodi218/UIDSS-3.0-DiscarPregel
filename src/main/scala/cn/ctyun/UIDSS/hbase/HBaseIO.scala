@@ -1,37 +1,42 @@
 /*********************************************************************
- * 
+ *
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
- * 
- *  [2015] - [2020] China Telecom Corporation Limited, 
+ * ____________________________________________________________
+ *
+ *  [2015] - [2020] China Telecom Corporation Limited,
  *  All Rights Reserved.
- * 
+ *
  * NOTICE:  All information contained herein is, and remains
  * the property of China Telecom Corporation and its suppliers,
- * if any. The intellectual and technical concepts contained 
- * herein are proprietary to China Telecom Corporation and its 
+ * if any. The intellectual and technical concepts contained
+ * herein are proprietary to China Telecom Corporation and its
  * suppliers and may be covered by China and Foreign Patents,
- * patents in process, and are protected by trade secret  or 
- * copyright law. Dissemination of this information or 
- * reproduction of this material is strictly forbidden unless prior 
+ * patents in process, and are protected by trade secret  or
+ * copyright law. Dissemination of this information or
+ * reproduction of this material is strictly forbidden unless prior
  * written permission is obtained from China Telecom Corporation.
  **********************************************************************/
 
 package cn.ctyun.UIDSS.hbase
 
-import org.apache.spark.rdd.RDD
+import java.util.Properties
+
 import org.apache.hadoop.hbase.HBaseConfiguration
+import org.apache.hadoop.hbase.TableName
+import org.apache.hadoop.hbase.client.HConnectionManager
+import org.apache.hadoop.hbase.client.HTableInterface
+import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.hadoop.hbase.client.HTableInterface
-import org.apache.hadoop.hbase.client.HConnectionManager
-import org.apache.hadoop.hbase.client.Put
-import org.apache.spark.SparkContext
-import java.util.Properties
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkFiles
+import org.apache.spark.rdd.RDD
+
 import cn.ctyun.UIDSS.hgraph.HGraphUtil
-import cn.ctyun.UIDSS.utils.{ Utils, Logging, Hash }
+import cn.ctyun.UIDSS.utils.Hash
+import cn.ctyun.UIDSS.utils.KerberorsJavaUtil
+import cn.ctyun.UIDSS.utils.Logging
 
 object HBaseIO extends Logging {
 
@@ -41,20 +46,20 @@ object HBaseIO extends Logging {
     //set zookeeper quorum
     hconf.set("hbase.zookeeper.quorum", props.getProperty("hbaseZkIp"));
     //set zookeeper port
-    hconf.set("hbase.zookeeper.property.clientPort", props.getProperty("hbaseZkPort"));
+    hconf.set("hbase.zookeeper.property.clientPort", props.getProperty("hbaseZkPort"));    
     hconf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"));
-    hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number")); 
-    
+    hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number"));    
     hconf.addResource("core-site.xml")
     hconf.addResource("hbase-site.xml")
-    hconf.addResource("hdfs-site.xml")      
+    hconf.addResource("hdfs-site.xml")
 
     //set which table to scan
-    hconf.set(TableInputFormat.INPUT_TABLE, props.getProperty("hbaseTableName"))
+    //===override the TableInputFormat to MyInputFormat added kerberos authentication===
+    hconf.set(MyTableInputFormat.INPUT_TABLE, props.getProperty("hbaseTableName"))
 
     //println(getNowDate() + " ****** Start reading from HBase   ******")
-    val rdd = sc.newAPIHadoopRDD(hconf, classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable], classOf[org.apache.hadoop.hbase.client.Result]).cache()
+    val rdd = sc.newAPIHadoopRDD(hconf, classOf[MyTableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable], classOf[org.apache.hadoop.hbase.client.Result]).cache()
     //println(getNowDate() + " ****** Finished reading from HBase   ******")
 
     //遍历输出
@@ -77,7 +82,7 @@ object HBaseIO extends Logging {
   }
 
   def saveToGraphTable(sc: SparkContext, props: Properties, rddToSave: RDD[((String, String), String)]): Int = {
-
+    info("------Writing data to Graph table start--------")
     var rddToSavePartition = rddToSave
     
     val partNumHBaseO = props.getProperty("rddPartNumHBaseO").toInt
@@ -89,29 +94,31 @@ object HBaseIO extends Logging {
 //    } 
     
     //多分区并行输出
+    info("------foreachPartition write data start--------")
     rddToSavePartition.foreachPartition {
-
       //一个分区内的所有行     
       case (rows) =>
         //println("        column is: " + this.getClass.getClassLoader().getResource(""))
         val hconf = HBaseConfiguration.create()
-
+        info("---------each partition create HBaseConfiguration-----------")
         //set zookeeper quorum
-        hconf.set("hbase.zookeeper.quorum", props.getProperty("hbaseZkIp"));
+        hconf.set("hbase.zookeeper.quorum", props.getProperty("hbaseZkIp"))
         //set zookeeper port
-        hconf.set("hbase.zookeeper.property.clientPort", props.getProperty("hbaseZkPort"));
+        hconf.set("hbase.zookeeper.property.clientPort", props.getProperty("hbaseZkPort"))           
         hconf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-        hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"));
-        hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number")); 
-
-        hconf.set("hbase.client.pause", "1000"); 
-        hconf.set("zookeeper.recovery.retry", "3"); 
+        hconf.set("hbase.zookeeper.property.maxClientCnxns", props.getProperty("hbase_zookeeper_property_maxClientCnxns"))
+        hconf.set("hbase.client.retries.number", props.getProperty("hbase_client_retries_number"))
+        hconf.set("hbase.client.pause", "1000")
+        hconf.set("zookeeper.recovery.retry", "3")
         
         hconf.addResource("core-site.xml")
         hconf.addResource("hbase-site.xml")
-        hconf.addResource("hdfs-site.xml")        
-        val connection = HConnectionManager.createConnection(hconf);
-        val htable: HTableInterface = connection.getTable(props.getProperty("hbaseTableName"));
+        hconf.addResource("hdfs-site.xml")   
+        //=========get HBase authenticated user==========
+        val loginedUser = KerberorsJavaUtil.getAuthenticatedUser(hconf,props,props.getProperty("keytabFile"))
+        val connection = HConnectionManager.createConnection(hconf,loginedUser)
+        info("------HBase connection is created--------")
+        val htable: HTableInterface = connection.getTable(TableName.valueOf(props.getProperty("hbaseTableName")))
 
         //批量写入
         val flushInBatch = props.getProperty("flushInBatch")
@@ -132,6 +139,7 @@ object HBaseIO extends Logging {
         var rowCount = 0 
         
 //        for (row <- rows.toArray) (
+        info("------HBase write data start--------")
         for (row <- rows) (
           {
             //row  ((行，列)，值）) 
@@ -151,10 +159,17 @@ object HBaseIO extends Logging {
             if ((rowCount % 1000)==0 && waitForHBase >0) { Thread.sleep(waitForHBase)}
           })
         //println(getNowDate() + " ****** Finished writing to HBase   ******")  
-        htable.flushCommits()
-        htable.close();
+        try{
+          info("=======prepare to flushCommits======")
+          htable.flushCommits()
+          info("=======flushCommits finished======")
+        }catch {
+          case e: Exception =>
+          info("=======flushCommits failed=======")
+        }
+        htable.close();          
         //println(getNowDate() + " ****** Flushed  to HBase   ******")
-
+        info("------HBase write data finished--------")
     }
     1
   }

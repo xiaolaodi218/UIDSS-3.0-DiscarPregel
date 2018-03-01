@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -34,7 +34,6 @@ import org.apache.hadoop.hbase.client.HConnectionManager
 import org.apache.hadoop.hbase.client.Put
 import cn.ctyun.UIDSS.utils.{ Utils, Logging }
 import cn.ctyun.UIDSS.hgraph.{ HGraphUtil, GraphXUtil, HtoXGenUID, XtoHGenUID }
-import cn.ctyun.UIDSS.hbase.HBaseIO
 import cn.ctyun.UIDSS.graphxop.{ PregelGenUIDFindLinks, PregelGenUID }
 import cn.ctyun.UIDSS.uidop.GenUID
 

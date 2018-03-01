@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -23,10 +23,11 @@ import java.util.Properties
 import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
-
-import cn.ctyun.UIDSS.utils.{ Utils, Logging }
+import cn.ctyun.UIDSS.utils.{Logging, Utils}
 import cn.ctyun.UIDSS.dfstohbase._
 import cn.ctyun.UIDSS.hbase._
+import org.apache.hadoop.io.{NullWritable, Text}
+import org.apache.hadoop.mapred.TextOutputFormat
 
 /**
  * 类描述：从HDFS加载关联关系到HBase
@@ -109,12 +110,14 @@ object LoadRawDataCmd extends Logging{
         HBaseIO.saveToGraphTable(sc, props, rddNew)
       }
       case "DPI_INFO_WB" => {
+        info("=============this is rddnew place============ ")
         val rddNew = DPIInfoWB(sc, hdfsPath + newData, "1")
         //保存UID生成结果到HBase
         //row  ((行，列)，值）)
         info("Writing DPI_INFO_WB records to Graph table. ")
         HBaseIO.saveToGraphTable(sc, props, rddNew)
-      }
+
+    }
       case "DPI_RAW" => {
         val rddNew = DPIRaw(sc, hdfsPath + newData, "1")
         //println("rddNewRelations is:  \n" + rddNew.collect().mkString("\n"))

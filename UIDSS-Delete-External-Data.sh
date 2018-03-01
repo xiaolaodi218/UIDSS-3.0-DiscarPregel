@@ -22,4 +22,4 @@ num_executors=$(__readINI UIDSS-Shell.ini DeleteExternal num_executors)
 executor_memory=$(__readINI UIDSS-Shell.ini DeleteExternal executor_memory)
 executor_cores=$(__readINI UIDSS-Shell.ini DeleteExternal executor_cores)
 
-spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster    --driver-memory ${driver_memory}  --executor-memory ${executor_memory}  --num-executors ${num_executors}  --executor-cores  ${executor_cores}  --queue ${yarn_queue}  UIDSS-2.10-jar-with-dependencies.jar Y_DeleteOldData ${obsolete_date}  
+spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn     --deploy-mode cluster  --files dev_yx.keytab  --driver-memory ${driver_memory}  --executor-memory ${executor_memory}  --num-executors ${num_executors}  --executor-cores  ${executor_cores}  --queue ${yarn_queue}  UIDSS-3.0-jar-with-dependencies.jar Y_DeleteOldData ${obsolete_date}

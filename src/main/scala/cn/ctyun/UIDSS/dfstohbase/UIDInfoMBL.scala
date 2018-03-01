@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -29,6 +29,7 @@ object UIDInfoMBL extends Logging{
   var weight: String = "1"
   
   def apply(sc: SparkContext, path: String, order: String, lant_id: String): RDD[((String, String), String)] = {
+
     val textFile = sc.textFile(path)
     weight = order
 

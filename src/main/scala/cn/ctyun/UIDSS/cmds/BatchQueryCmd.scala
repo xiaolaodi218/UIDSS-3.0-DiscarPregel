@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -19,15 +19,15 @@
 package cn.ctyun.UIDSS.cmds
 
 import java.util.Properties
+
 import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
 import org.apache.hadoop.hbase.util.Bytes
-import cn.ctyun.UIDSS.utils.{ Utils, Logging }
-import cn.ctyun.UIDSS.hgraph.{ HGraphUtil, HtoXBatchQuery, GraphXUtil }
+import cn.ctyun.UIDSS.utils.{Logging, Utils}
+import cn.ctyun.UIDSS.hgraph.{GraphXUtil, HGraphUtil, HtoXBatchQuery}
+import cn.ctyun.UIDSS.graphxop.PregelBatchQuery
 import cn.ctyun.UIDSS.hbase.HBaseIO
-
-import cn.ctyun.UIDSS.graphxop.{ PregelBatchQuery }
 
 object BatchQueryCmd {
 

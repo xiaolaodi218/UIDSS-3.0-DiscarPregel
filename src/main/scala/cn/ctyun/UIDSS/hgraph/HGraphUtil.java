@@ -62,7 +62,9 @@ public class HGraphUtil {
 	public static final String STR_IDFA = "IA";  // IDFA是 "IA"
 	public static final String STR_AndroidID = "AD";  // AndroidID是 "AD"
 	public static final String STR_MAC= "MC"; //设备MAC地址
-	public static final String STR_IIM = "IM";  // IMEI + IMSI + MAC.
+	public static final String STR_IIM1 = "IM1";  // IMEI + IMSI + MAC1.
+	public static final String STR_IIM2 = "IM2";  // IMEI + IMSI + MAC2.
+	public static final String STR_IIM3 = "IM3";  // IMEI + IMSI + MAC3.
 	
 	public static final String STR_UD = "UD";  // UID是 "UD"
 	

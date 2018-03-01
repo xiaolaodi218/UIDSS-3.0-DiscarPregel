@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -27,15 +27,15 @@ package cn.ctyun.UIDSS
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import java.util.Properties
-
 import utils.{ Utils, Logging, Hash }
 import cmds._
-
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Date
-
 import java.util.concurrent.{Executors, ExecutorService}
+import org.apache.hadoop.hdfs.DistributedFileSystem
+import org.apache.spark.api.java.JavaSparkContext
+import cn.ctyun.UIDSS.utils.KerberorsJavaUtil
 
 object UIDSS extends Logging {
 
@@ -69,7 +69,9 @@ object UIDSS extends Logging {
     }
     
     val sc = new SparkContext(conf)
-    
+    //sc.addFile("hdfs://nameservice1:8020/daas/motl/dws/msk/wdtb/dev_yx.keytab")
+    info("=====spark add hdfs file successed====")
+   
     //监控线程
     Executors.newSingleThreadExecutor().execute(new MonitorThread(sc))
 

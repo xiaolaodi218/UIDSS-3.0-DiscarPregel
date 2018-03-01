@@ -2,7 +2,7 @@
  * *******************************************************************
  *
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  *
  *  [2015] - [2020] China Telecom Corporation Limited,
  *  All Rights Reserved.
@@ -22,10 +22,12 @@ package cn.ctyun.UIDSS.cmds
 
 import java.util.Properties
 import java.util.UUID
+
 import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
 import org.apache.hadoop.hbase.util.Bytes
+
 import scala.collection.mutable.ListBuffer
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Result
@@ -34,11 +36,11 @@ import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.client.HTableInterface
 import org.apache.hadoop.hbase.client.HConnectionManager
 import org.apache.hadoop.hbase.client.Put
-import cn.ctyun.UIDSS.utils.{ Utils, Logging }
-import cn.ctyun.UIDSS.hgraph.{ HGraphUtil, GraphXUtil, HtoXGenUID, XtoHGenUID, XtoHGenUIDExt }
+import cn.ctyun.UIDSS.utils.{Logging, Utils}
+import cn.ctyun.UIDSS.hgraph.{GraphXUtil, HGraphUtil, HtoXGenUID, XtoHGenUID, XtoHGenUIDExt}
+import cn.ctyun.UIDSS.graphxop.{PregelGenUID, PregelGenUIDExtFindLinks}
 import cn.ctyun.UIDSS.hbase.HBaseIO
-import cn.ctyun.UIDSS.graphxop.{ PregelGenUIDExtFindLinks, PregelGenUID }
-import cn.ctyun.UIDSS.uidop.{ GenUID, GenUIDExt }
+import cn.ctyun.UIDSS.uidop.{GenUID, GenUIDExt}
 
 /**
  * 类描述：统计UID生成的结果

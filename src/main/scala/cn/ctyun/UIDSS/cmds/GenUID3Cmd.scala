@@ -2,7 +2,7 @@
  * *******************************************************************
  *
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  *
  *  [2015] - [2020] China Telecom Corporation Limited,
  *  All Rights Reserved.
@@ -22,13 +22,14 @@ package cn.ctyun.UIDSS.cmds
 
 import java.util.Properties
 import java.util.UUID
-import org.apache.spark.SparkContext
 
+import cn.ctyun.UIDSS.UIDSS.info
+import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 import org.apache.spark.storage.StorageLevel
-
 import org.apache.spark.rdd.RDD
 import org.apache.hadoop.hbase.util.Bytes
+
 import scala.collection.mutable.ListBuffer
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Result
@@ -37,11 +38,11 @@ import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.client.HTableInterface
 import org.apache.hadoop.hbase.client.HConnectionManager
 import org.apache.hadoop.hbase.client.Put
-import cn.ctyun.UIDSS.utils.{ Utils, Logging }
-import cn.ctyun.UIDSS.hgraph.{ HGraphUtil, GraphXUtil, HtoXGenUID, XtoHGenUID, XtoHGenUIDExt }
+import cn.ctyun.UIDSS.utils.{Logging, Utils}
+import cn.ctyun.UIDSS.hgraph.{GraphXUtil, HGraphUtil, HtoXGenUID, XtoHGenUID, XtoHGenUIDExt}
+import cn.ctyun.UIDSS.graphxop.{PregelGenUIDFindGroups, PregelGenUIDFindPairs}
 import cn.ctyun.UIDSS.hbase.HBaseIO
-import cn.ctyun.UIDSS.graphxop.{ PregelGenUIDFindPairs, PregelGenUIDFindGroups }
-import cn.ctyun.UIDSS.uidop.{ GenUIDExtPair, GenUIDExtGroup }
+import cn.ctyun.UIDSS.uidop.{GenUIDExtGroup, GenUIDExtPair}
 
 /**
  * 类描述：生成UID操作
@@ -66,6 +67,7 @@ object GenUID3Cmd extends Logging {
 
     /********  一 、从HBase中取出数据  *******/
     //Output:  RDD[(ImmutableBytesWritable, Result)]
+    info("this is the getGraphTableRDD place ")
     val rddHbase = HBaseIO.getGraphTableRDD(sc, props)
     info(getNowDate() + " ******  Finished loading  rows from HBase ******")
 
@@ -73,6 +75,7 @@ object GenUID3Cmd extends Logging {
     //为每个起始点加序列号sn，也就是HBase分区序号*每分区最大行数 + 该分区内的行序号。
     //比如： （100100001, {AI430851876/v:$1AN06F6642CE07804C26B847BEAEEB0204A/1458733523410/Put/vlen=4/mvcc=0} ) 
     info(" ****** 点序号  ******")
+    info("this is the rddHBaseWithSN place ")
     val rddHBaseWithSN = rddHbase
       .mapPartitionsWithIndex { (ind, vs) =>
         var sn = GraphXUtil.MAX_VERTICE + ind * GraphXUtil.MAX_VERTICE_PER_PARTITION
@@ -101,11 +104,13 @@ object GenUID3Cmd extends Logging {
     //---其中   Vertex (vid: Long, (typ: String, temp:Long))
     //---         Edge (src: Long, dst: Long, prop: (typ: String , weight: Int) )
     info(getNowDate() + " ******  从  RDD 生成图  ******")
+    info("this is the getGraphRDD place ")
     val graph = HtoXGenUID.getGraphRDD(rdd, sc)
 
 
     /******** 三、找出图中所有的号码对及孤立号码 *******/
-    //GraphX的图，通过2层pregel找出相邻号码 
+    //GraphX的图，通过2层pregel找出相邻号码
+    info("this is the graphCnnd place ")
     val searchDepth = props.getProperty("searchDepth").toInt
     val graphCnnd = PregelGenUIDFindPairs(graph, 2, props)
     //println("graphCnnd.vertices: \n" + graphCnnd.vertices.collect().mkString("\n")) 
@@ -189,6 +194,7 @@ object GenUID3Cmd extends Logging {
     //为起点找到其编码及所有邻接点
     //output:
     //(1002700000000001,((WN8D000000,QQ25300000;QQ47900000;QQ94200000;UD4511d6d592c74237b021e17d4b28caa6),1003750000000001))
+    info("this is the ddRawCNPairsJoinF place ")
     val rddRawCNPairsJoinF = HtoXGenUID.rddVidtoLinks.join(rddRawCNPairs)
     //println("rddRawCNPairsJoinF " + rddRawCNPairsJoinF.collect().mkString("\n")) 
     
@@ -225,7 +231,8 @@ object GenUID3Cmd extends Logging {
 
     
     /******** 五、以通信号码为点, 以有效号码对为边, 再次构建图 *******/
-    //号码之间的关联是边。 
+    //号码之间的关联是边。
+    info("this is the rddGroupEdge place ")
     var rddGroupEdge = rddRealPairs.flatMap{ case ((s_vid,s_id),(e_vid,e_id)) => {
         val buf = new ListBuffer[Edge[(String, Int)]]
         if (e_vid>0) {
@@ -269,6 +276,7 @@ object GenUID3Cmd extends Logging {
      
      /******** 六、找出图中所有通信号码所属group *******/    
     //	pregel 获得 关联的组
+    info("this is the PregelGenUIDFindGroups place ")
     val graphGroup = PregelGenUIDFindGroups(graphPairs, 2, props)
     //println("graphGroup.vertices: \n" + graphGroup.vertices.collect().mkString("\n")) 
     //println("graphGroup.edges : \n" + graphGroup.edges.collect().mkString("\n")) 
@@ -337,6 +345,7 @@ object GenUID3Cmd extends Logging {
     //---其中 第一个String是找到或生成的这个树的UID，  （id: 是节点id  , uid: String 记录了相邻的UID）
     //---比如   UDc7e88a94542343fa83ff7a5b6c18c57e， List((AI430851876,), (IDb5eafeb6f2e8228df4c23fc2e4f1f0b2,),...)
     info(getNowDate() + " ****** 算出优势UID，如果没有则要生成   ******")
+    info("this is the GenUIDExtGroup place ")
     val rddGroupWithUID = GenUIDExtGroup(rddCnndGroup, props)
     //println("rddGroupWithUID is:  " + rddGroupWithUID.collect().mkString("\n"))
     
@@ -348,11 +357,13 @@ object GenUID3Cmd extends Logging {
     //---   ((行，列)，值）)
     //---  ((IDb5eafeb6f2e8228df4c23fc2e4f1f0b2,zzUDc7e88a94542343fa83ff7a5b6c18c57e),1)
     info(getNowDate() + " ****** 计算出所有要添加的（原来没有UID的节点，增加到），更新的  ******")
+    info("this is the XtoHGenUIDExt place ")
     var rddNewRelations = XtoHGenUIDExt(rddGroupWithUID)
     //println("rddNewRelations is:  " +  rddNewRelations.collect().mkString("\n"))
 
     /********九、保存UID边到HBase *******/
     //row  ((行，列)，值）)
+    info("this is the saveToGraphTable place ")
     HBaseIO.saveToGraphTable(sc, props, rddNewRelations)
   }
 }

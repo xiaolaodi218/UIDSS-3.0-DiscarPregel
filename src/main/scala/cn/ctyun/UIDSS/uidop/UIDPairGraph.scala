@@ -160,7 +160,8 @@ class UIDPairGraph(group: List[(String, String)]) {
       //每号码的所有id关联(QQ,TDID,id)        
       val linkgroups = getIdLinks(an)
 
-      //根据关联强度，关联同一用户的号码，        
+      //根据关联强度，关联同一用户的号码，将通信号码进行判断，找出所有符合业务规则的原通信号码
+      //和所有目的通信号码所组成的set集合构成的MAP集合
       //如果优化，可以移出已经加过的? 不行可能共用同一号码.
       for (linkgroup <- linkgroups) {
         if (isSameUserNew(an, linkgroup._1, linkgroup._2)) {
@@ -223,7 +224,7 @@ class UIDPairGraph(group: List[(String, String)]) {
       var iWeChat = 0
       var iID = 0
       var iCI = 0
-
+    //是否有QQ或者微信节点的邻居，有返回1，没有返回0
       var iSrcHasQQ = hasQQNeighbor(vSrc)
       var iDstHasQQ = hasQQNeighbor(vDst)
       var iSrcHasWeChat = hasWeChatNeighbor(vSrc)
@@ -250,8 +251,10 @@ class UIDPairGraph(group: List[(String, String)]) {
             case HGraphUtil.STR_WE_CHAT => {
               iWeChat = iWeChat + 1
             }
+              //省份证号
             case HGraphUtil.STR_ID_NUM => {
               //只有移动号与固话/宽带号之间可以通过ID相等
+              //有一个移动号的前提下，另一个号是固话或者宽带，并且通过客户省份证好相连
               if (dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
                 || styp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
                 || dtyp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0
@@ -260,8 +263,10 @@ class UIDPairGraph(group: List[(String, String)]) {
                 sID = vInter
               }
             }
+              //客户ID
             case HGraphUtil.STR_CUST_ID => {
               //只有移动号与固话/宽带号之间可以通过客户ID相等
+              //有一个移动号的前提下，另一个号是固话或者宽带.并且通过客户ID相连
               if (dtyp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
                 || styp.compareToIgnoreCase(HGraphUtil.STR_ACCS_NUM) == 0
                 || dtyp.compareToIgnoreCase(HGraphUtil.STR_WB_NUM) == 0
@@ -296,7 +301,9 @@ class UIDPairGraph(group: List[(String, String)]) {
         //(归属城市标识相同 and客户ID相同 and 身份证号码空 and移动接入号码相同 and (固网接入号码相同 |固网接入号码空))
         //]
         //		生成唯一UID
+        //没有网络帐号，无QQ或者微信连接点。
         if (iSrcHasQQ < 1 && iDstHasQQ < 1 && iSrcHasWeChat < 1 && iDstHasWeChat < 1) {
+          //countMobileNeighbors是否有多个移动号邻居节点
           if ((iCI == 1 && countMobileNeighbors(sCust_ID) == 1)
             && ((iID == 1 && countMobileNeighbors(sID) == 1) || (iID == 0))) {
             iweight = 1

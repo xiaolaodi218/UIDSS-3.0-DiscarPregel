@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -29,11 +29,14 @@ object DPIInfoMBL extends Logging{
   var weight: String = "1"
 
   def apply(sc: SparkContext, path: String, order: String): RDD[((String, String), String)] = {
+    info("===================text place=============================")
     val textFile = sc.textFile(path)
     val result = textFile.flatMap(convert(_))
     //println(result.collect().mkString("\n"))
     //info("DPIInfoMBL processed " + count + " lines.")
+    info("===================result place=============================")
     result
+
   }
 
   /* 2016-3-31版本
@@ -55,11 +58,14 @@ object DPIInfoMBL extends Logging{
   */
 
   def convert(line: String): Iterable[((String, String), String)] = {
+    info("===================convert place=============================")
+
     val buf = ListBuffer[((String, String), String)]()
 
     try {
       val fields = line.split("\\|",-1)
-
+      val len = fields.length
+      info("the string length="+len)
       if (fields.length!=15) {
         throw new RuntimeException("Table DPI Info MBL has an incorrect fields length!")  
       } 
@@ -165,9 +171,10 @@ object DPIInfoMBL extends Logging{
           buf += (((HGraphUtil.STR_MBL_NUM + MDN, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_IMEI + IMEI), weight))
           buf += (((HGraphUtil.STR_IMEI  + IMEI, HGraphUtil.STR_TABLE_UID_OTH_DPI_USER_ACCOUNT + HGraphUtil.STR_MBL_NUM + MDN), weight))
         }           
-        count += 1
+        info("IMEI="+IMEI)
       }
       }
+      info("=====================this is end else place=================================")
     } catch {
       case e: Exception =>
     }

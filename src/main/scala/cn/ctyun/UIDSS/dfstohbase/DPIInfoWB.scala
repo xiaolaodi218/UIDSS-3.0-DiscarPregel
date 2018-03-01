@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -29,10 +29,13 @@ object DPIInfoWB extends Logging{
   var weight: String = "1"
 
   def apply(sc: SparkContext, path: String, order: String): RDD[((String, String), String)] = {
+    info("this is text place")
+    info(path)
     val textFile = sc.textFile(path)
     val result = textFile.flatMap(convert(_))
     //println(result.collect().mkString("\n"))
     //info("UIDSS: DPIInfoWB processed " + count + " lines.")
+    info("===========this is result place==================")
     result
   }
 
@@ -80,7 +83,9 @@ object DPIInfoWB extends Logging{
    *40   MAC1				MAC地址1 		STRING	　	　
    *41   MAC2				MAC地址2 		STRING	　	　
    *42   MAC3				MAC地址3 		STRING
-   *43		 IIM          IMSI + IMEI + MAC  STRING  
+   *43		 IIM1          IMSI + IMEI + MAC1  STRING
+   *44		 IIM2          IMSI + IMEI + MAC2  STRING
+   *45		 IIM3          IMSI + IMEI + MAC3  STRING
    */
 
   def convert(line: String): Iterable[((String, String), String)] = {
@@ -88,10 +93,12 @@ object DPIInfoWB extends Logging{
 
     try {
       val fields = line.split("\\|",-1)
+      val len = fields.length
+      info(len.toString+"length")
       
-      if (fields.length!=44) {
-        throw new RuntimeException("Table DPI Info WB has an incorrect fields length!")  
-      } 
+      if (fields.length!=46) {
+        throw new RuntimeException("Table DPI Info WB has an incorrect fields length!")
+      }
       else {
 
       val WB_Num = fields(0);
@@ -137,7 +144,9 @@ object DPIInfoWB extends Logging{
       val MAC1 = fields(40);
       val MAC2 = fields(41);
       val MAC3 = fields(42);
-      val IIM = fields(43);
+      val IIM1 = fields(43);
+      val IIM2 = fields(44);
+      val IIM3 = fields(45);
       
 
       if (null != WB_Num && WB_Num.length() > 7 && WB_Num.length() < 100) {
@@ -310,7 +319,7 @@ object DPIInfoWB extends Logging{
           buf += (((HGraphUtil.STR_AndroidID + AndroidID3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
-        // 添加微信号与宽带号关系			
+        // 添加微信号与宽带号关系
         if (null != WeChat1 && WeChat1.length() >= 5 && WeChat1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WE_CHAT + WeChat1), weight))
           buf += (((HGraphUtil.STR_WE_CHAT  + WeChat1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
@@ -324,7 +333,7 @@ object DPIInfoWB extends Logging{
           buf += (((HGraphUtil.STR_WE_CHAT  + WeChat3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
-        // 添加MAC与宽带号关系			
+        // 添加MAC与宽带号关系
         if (null != MAC1 && MAC1.length() >= 5 && MAC1.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MAC + MAC1), weight))
           buf += (((HGraphUtil.STR_MAC  + MAC1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
@@ -336,18 +345,31 @@ object DPIInfoWB extends Logging{
         if (null != MAC3 && MAC3.length() >= 5 && MAC3.length() < 100) {
           buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_MAC  + MAC3), weight))
           buf += (((HGraphUtil.STR_MAC  + MAC3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
-        }        
-        
-        // 添加IIM与宽带号关系			
-        if (null != IIM && IIM.length() >= 5 && IIM.length() < 100) {
-          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IIM + IIM), weight))
-          buf += (((HGraphUtil.STR_IIM  + IIM, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
         }
 
-        
-        count += 1
+        // 添加IIM1与宽带号关系
+        if (null != IIM1 && IIM1.length() >= 5 && IIM1.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IIM1 + IIM1), weight))
+          buf += (((HGraphUtil.STR_IIM1  + IIM1, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+
+        // 添加IIM2与宽带号关系
+        if (null != IIM2 && IIM2.length() >= 5 && IIM2.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IIM2 + IIM2), weight))
+          buf += (((HGraphUtil.STR_IIM2  + IIM2, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+
+        // 添加IIM3与宽带号关系
+        if (null != IIM3 && IIM3.length() >= 5 && IIM3.length() < 100) {
+          buf += (((HGraphUtil.STR_WB_NUM + WB_Num, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_IIM3 + IIM3), weight))
+          buf += (((HGraphUtil.STR_IIM3  + IIM3, HGraphUtil.STR_TABLE_UID_FIX_DPI_USER_ACCOUNT + HGraphUtil.STR_WB_NUM + WB_Num), weight))
+        }
+        info(QQ1+"this is IIM3")
+       info("this is convert  end ")
+
       }
       }
+      info("this is else  end ")
     } catch {
       case e: Exception =>
     }

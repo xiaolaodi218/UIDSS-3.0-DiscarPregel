@@ -1,7 +1,7 @@
 /*********************************************************************
  * 
  * CHINA TELECOM CORPORATION CONFIDENTIAL
- * ______________________________________________________________
+ * ____________________________________________________________
  * 
  *  [2015] - [2020] China Telecom Corporation Limited, 
  *  All Rights Reserved.
@@ -19,13 +19,15 @@
 package cn.ctyun.UIDSS.cmds
 
 import java.util.Properties
+
+import cn.ctyun.UIDSS.hbase.HBaseIO
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.hadoop.hbase.util.Bytes
+
 import scala.collection.mutable.ListBuffer
-import cn.ctyun.UIDSS.utils.{ Utils, Logging }
-import cn.ctyun.UIDSS.hbase.HBaseIO
-import cn.ctyun.UIDSS.hgraph.{ HGraphUtil, GraphXUtil }
+import cn.ctyun.UIDSS.utils.{Logging, Utils}
+import cn.ctyun.UIDSS.hgraph.{GraphXUtil, HGraphUtil}
 
 /**
  * 类描述：删除某个日期前的网络侧数据 (因为网络侧每次都是加载全量)
