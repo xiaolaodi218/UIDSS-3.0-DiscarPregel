@@ -17,4 +17,4 @@ num_executors=$(__readINI UIDSS-Shell.ini Stat num_executors)
 executor_memory=$(__readINI UIDSS-Shell.ini Stat executor_memory)
 executor_cores=$(__readINI UIDSS-Shell.ini Stat executor_cores)
 
-spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn  --deploy-mode cluster --files dev_yx.keytab --driver-memory  ${driver_memory}  --executor-memory  ${executor_memory}  --num-executors  ${num_executors}  --executor-cores ${executor_cores}  --queue ${yarn_queue}  UIDSS-3.0-jar-with-dependencies.jar  Y_Stat ${hdfs_base_dir}/${statis_dir}/
+spark-submit --class cn.ctyun.UIDSS.UIDSS  --master yarn  --deploy-mode cluster --files /home/dal_pro/dal_pro.keytab --driver-memory  ${driver_memory}  --executor-memory  ${executor_memory}  --num-executors  ${num_executors}  --executor-cores ${executor_cores}  --queue ${yarn_queue}  UIDSS-3.0-jar-with-dependencies.jar  Y_Stat ${hdfs_base_dir}/${statis_dir}/
