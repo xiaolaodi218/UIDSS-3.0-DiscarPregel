@@ -52,7 +52,8 @@ object GenUIDExtPair extends Logging{
       false
     }
   }
-
+  //pair List((s_id, s_links), (e_id, e_links))
+  //将s_id的节点所连接的s_lintks，和s_links中的点的所连接的其他所有节点都做成（s_id,s_link）的形式
   def expandPairToGraph(pair: List[(String, String)]): List[(String, String)] = {
 
     var g = Map[String, Set[String]]()
@@ -95,6 +96,8 @@ object GenUIDExtPair extends Logging{
     val rddPairs = rddCnndGroup.flatMap {
       case (((s_vid, s_id), s_links), ((e_vid, e_id), e_links)) => {
         if (s_links.length() > 0 && e_links.length() > 0) {
+          //pair List((s_id, s_links), (e_id, e_links))
+        //将s_id的节点所连接的s_lintks，和s_links中的点的所连接的其他所有节点都做成（s_id,s_link）的形式
           var pairGraph = expandPairToGraph(List((s_id, s_links), (e_id, e_links)))
           if (findTruePair(pairGraph)) {
             List(((s_vid, s_id), (e_vid, e_id)))

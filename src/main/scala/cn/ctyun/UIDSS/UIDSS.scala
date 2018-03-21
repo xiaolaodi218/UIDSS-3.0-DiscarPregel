@@ -42,7 +42,6 @@ object UIDSS extends Logging {
   val APP_PROP_NAME = "user-id-server.properties"; //集群属性文件  
 
   def main(args: Array[String]) {
-    
     if (args.length < 1) {
       println("USAGE: spark-submit [options] <app jar | python file> [app options]".format())
       System.exit(0)

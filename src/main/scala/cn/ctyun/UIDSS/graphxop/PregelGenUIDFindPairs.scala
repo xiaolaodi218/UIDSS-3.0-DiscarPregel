@@ -92,7 +92,7 @@ object PregelGenUIDFindPairs {
     }
     msgBuf.toList
   }
-
+  //rddVertex (sn,(id.substring(0,2),(0L,neightbosrs)))
   def vprog(vertexId: VertexId, value: (String, (Long, List[(Long, Long)])), message: List[(Long, Long)]): (String, (Long, List[(Long, Long)])) = {
 
     if (1 == message.length && initialMsg == message.head._1) { //初始化消息

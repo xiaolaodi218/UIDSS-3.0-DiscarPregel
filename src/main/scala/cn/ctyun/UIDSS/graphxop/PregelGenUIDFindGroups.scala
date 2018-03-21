@@ -34,12 +34,13 @@ object PregelGenUIDFindGroups {
   val initialMsg: Long = 2*GraphXUtil.MAX_VERTICE
 
   //找出连接子图
+  //(vertexId: VertexId, value: (String, (Long, List[(Long, Long)]))
   //Vertex (vid: VertextId: Long, (id: String, (temp:Long, uid: String)))
   //Edge (src: VertexId, dst: VertexId, prop: (type: String , weight: Long) )
   def sendMsg(edge: EdgeTriplet[(String, (Long, List[(Long, Long)])), (String, Int)]): Iterator[(VertexId, List[(Long, Long)])] = {
     
     //println("sendMsg;  " +  edge.toString() )
-    val srcType : String = edge.srcAttr._1.substring(0, 2)  
+    val srcType : String = edge.srcAttr._1.substring(0, 2)
     val dstType : String = edge.dstAttr._1.substring(0, 2) 
     var srcMinID = edge.srcAttr._2._1
     var dstMinID = edge.dstAttr._2._1
@@ -120,6 +121,7 @@ object PregelGenUIDFindGroups {
 
     if (1 == message.length && initialMsg == message.head._1) { //初始化消息
       // println(value._1 + " is assigned vertex id " + vertexId + " , initialMsg is " + initialMsg + " , message is " + message )
+      //(AN,(vertexId,List((initialMsg, 0L))))
       (value._1, (vertexId, value._2._2)) //最初把每个节点的值都初始为自己的节点序号
     } else {
       
@@ -141,6 +143,7 @@ object PregelGenUIDFindGroups {
                   var neighbor = neighbors.find({_._1==msg._1})
                   if (neighbor != None) {
                     //替换邻居最小值
+
                     newNeighbors +=((msg._1   ,msg._2 min neighbor.get._2))
                   } 
                   else {

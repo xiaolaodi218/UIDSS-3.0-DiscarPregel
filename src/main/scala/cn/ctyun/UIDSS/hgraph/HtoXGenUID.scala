@@ -95,6 +95,7 @@ object HtoXGenUID extends Logging {
           var iMN=0
           var iWN=0
           for (cell<-cells ) {
+            //取出每列中的值
             val cellType = Bytes.toString(cell.getQualifier).substring(2, 2)  
             if (HGraphUtil.STR_MBL_NUM.compareTo(cellType)==0) iMN+=1
             if (HGraphUtil.STR_MBL_NUM.compareTo(cellType)==0) iWN+=1
@@ -219,7 +220,7 @@ object HtoXGenUID extends Logging {
   }
 
   //保存到邻接列表以后用
-  //把HBase一行, 就是一个点的所有邻居   ( 1000001234567 , "AN12345,MN678910,...")
+  //把HBase一行, 就是一个点的所有邻居   ( 1000001234567 ,(AN12345,MN678910:WN2345...))
   def convertToLinks(sn: Long, v: Result): (Long, (String, String)) = {
     var links = ""
     val row = Bytes.toString(v.getRow.drop(2))
@@ -435,7 +436,9 @@ object HtoXGenUID extends Logging {
     //   Edge ((src: VertexId, dst: VertexId),  (typ: String , weight: Int) )
     val rddDirectedEdge = rddJoinByDstId.map {
       case (dstId, ((srcVId, edgeTyp), (dstVid, nodeTyp))) => {
+        //为什么edgtype会大于2？
         if (edgeTyp.length() > 2) { println("Directed Edge:  (" + srcVId + " , " + dstVid + "); Edgetype is  " + edgeTyp + "; Dst Id is" + dstId) }
+        //组成一个小序号在前，大序号在后的一个边
         if (srcVId > dstVid) {
           ((dstVid, srcVId), (edgeTyp, 1))
         } else {
