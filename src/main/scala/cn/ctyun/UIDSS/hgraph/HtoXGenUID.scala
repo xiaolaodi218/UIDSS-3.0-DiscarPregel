@@ -73,7 +73,11 @@ object HtoXGenUID extends Logging {
   }
 
   var rddVidtoLinks: RDD[(Long, (String, String))] = null
-
+//================================20180410===============================
+  var connect2PairRDD:RDD[(String,String)] = null
+  var UPTN:RDD[Long] = null
+//================================20180410===============================
+  
   def isDebugVert(vert: String): Boolean = {
     var bDebugVert = false
     if ("QQ974834277".compareTo(vert) == 0
@@ -294,7 +298,69 @@ object HtoXGenUID extends Logging {
 
     buf.toIterable
   }
+ 
+//==============================20180410============================
+  def map2ConnectRDD(sn: Long, v: Result): Iterable[(String, String)] = {
+    var needPrint = false
+    //将号码对保存在pairs中
+    val pairs = new ListBuffer[(String,String)]()
 
+    val row = Bytes.toString(v.getRow.drop(2))
+    //超大节点暂不考虑
+    if (isVertNeedProcessing(row,  v.rawCells())) {
+      //只保留连接节点
+      val rowType = Bytes.toString(v.getRow).substring(2, 4)
+      var process = false
+      rowType match {
+        case "ID" => process = true
+        case "CI" => process = true
+        case "QQ" => process = true
+        case "WC" => process = true
+        case "UD" => process = true
+        case _ => process = false
+      }
+      //将连接节点的邻居节点展开为号码对，如：ID邻居有 MN123,AN123,WN123,MN456
+      //转换成（MN123,AN123），（MN123，WN123），（MN123，MN456）以此类推
+      //将所有号码存入nums中
+      val nums = new ListBuffer[String]()
+      if(process){
+          for (c <- v.rawCells()) {
+          var dst = Bytes.toString(c.getQualifier)
+          val ty = dst.substring(0, 2)
+          dst = dst.substring(2)
+          val nodeTy = dst.substring(0, 2)
+          if (isEdgeNeedProcessing(row, nodeTy)) {
+            if(nodeTy.equals("AN")||nodeTy.equals("MN")||nodeTy.equals("WN")){             
+              	var value = 0
+          			try {
+          				value = Bytes.toInt(c.getValue)
+          			} catch {
+          			  case _: Throwable =>
+          			}
+              	if (value > 0) {
+              		nums += dst            		
+              	}            	
+            }
+          }
+        }
+      }
+      //循环将所有号码组成号码对
+      var loop = 1    
+      for(num <- nums){
+        var inloop = loop
+        while(inloop < nums.length){
+          pairs += ((num, nums(inloop)))
+          inloop += 1
+        }
+        loop += 1
+      }
+      
+    }
+    pairs.toIterable
+  }
+ 
+//==============================20180410============================
+  
   //Graph[点 (String 点类型, Long 根节点序号),  边(String 边类型, Int 权重)] 
   //def getGraphRDD(rdd: RDD[(ImmutableBytesWritable, Result)], sc: SparkContext): Graph[(String, Long), (String, Int)] = {
   def getGraphRDD(rddHBaseWithSN: RDD[(Long, Result)], sc: SparkContext): Graph[(String, (Long, List[(Long, Long)])), (String, Int)] = {
@@ -404,6 +470,32 @@ object HtoXGenUID extends Logging {
         }
         mapToEdges(sn, v)
     }
+//==========================20180410=====================================    
+    connect2PairRDD = rddHBaseWithSN.flatMap {
+      case (sn, v) =>
+       map2ConnectRDD(sn,v)
+    }
+    
+    UPTN = rddHBaseWithSN.flatMap {
+      case (sn, v) =>
+         val buf = new ListBuffer[Long]
+         val row = Bytes.toString(v.getRow.drop(2))
+         if (isVertNeedProcessing(row,  v.rawCells())) { 
+         val rowType = row.substring(0, 2)
+         var keep = false
+         rowType match {
+            case "AN" => keep = true
+            case "WN" => keep = true
+            case "MN" => keep = true
+            case _ => keep = false
+         }
+         if(keep){
+            buf += sn
+         }
+      }
+      buf.toIterable
+    }
+//==========================20180410=====================================  
     //rddVtoV.foreach {
     //  case (dst, (sn, typ)) =>
     //    println("Dst node id is: " + dst + ";  source node serial number is: " + sn + "; link type is:  " + typ)
@@ -472,7 +564,6 @@ object HtoXGenUID extends Logging {
 
     //-------------------------------------------------
     //生成图
-    //-------------------------------------------------
     Graph(rddVertex, rddEdge, null, StorageLevel.MEMORY_AND_DISK, StorageLevel.MEMORY_AND_DISK)
   }
 }

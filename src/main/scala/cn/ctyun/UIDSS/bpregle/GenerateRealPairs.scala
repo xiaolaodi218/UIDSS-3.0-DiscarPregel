@@ -11,22 +11,24 @@ import cn.ctyun.UIDSS.hgraph.HGraphUtil
 import java.util.HashMap
 
 object GenerateRealPairs extends Logging {
-  def realPairs(rddHBaseWithSN:RDD[(Long,Result)]):RDD[((Long,String),(Long,String))] = {    
+  def realPairs(rddHBaseWithSN:RDD[(Long,Result)]):RDD[((Long,String),(Long,String))] = {     
+      
     //过滤无用节点
     val keepNodeRDD = rddHBaseWithSN.filter{
       (v) =>
         var keep = false
         val ty = Bytes.toString(v._2.getRow).substring(2,4)
+        val neighbors = v._2.size()
         ty match {
-          case "ID" => keep = true
-          case "CI" => keep = true
-          case "QQ" => keep = true
-          case "WC" => keep = true
+          case "ID" => if(neighbors<11) keep = true
+          case "CI" => if(neighbors<30) keep = true
+          case "QQ" => if(neighbors<11) keep = true
+          case "WC" => if(neighbors<11) keep = true
           case "AN" => keep = true
           case "MN" => keep = true
-          case "WN" => keep = true
-          case "UD" => keep = true
-          case "IS" => keep = true
+          case "WN" => if(neighbors<11) keep = true
+          case "UD" => if(neighbors<11) keep = true
+          case "IS" => if(neighbors<11) keep = true
           case _    => 
         }
         keep
@@ -36,7 +38,7 @@ object GenerateRealPairs extends Logging {
       (v) =>
         val row = Bytes.toString(v._2.getRow).substring(2)
         val ty = Bytes.toString(v._2.getRow).substring(2,4)
-        if(ty.equals("AN")||ty.equals("WM")||ty.equals("MN")){
+        if(ty.equals("AN")||ty.equals("WN")||ty.equals("MN")){
           (0L,("",""))
         }else{
         	val qualifiers = v._2.rawCells()
@@ -56,7 +58,13 @@ object GenerateRealPairs extends Logging {
         	if(v._2.size()>1000){
         		info("===="+row+"==has=="+orther+"==orther nodes==")        	  
         	}
-        	(v._1,(ty+MN,value.substring(1)))                   
+        	if(value.length()>1){
+        		(v._1,(ty+MN,value.substring(1)))                   
+        	}else{
+        	  info("====this connect node has no UPTN neighbor====")
+        	  info("==node is=="+row+"==tyMN=="+ty+MN)
+        	  (v._1,(ty+MN,value))
+        	}
         }        
     }.filter((v) => v._1>0)
     
@@ -135,13 +143,13 @@ object GenerateRealPairs extends Logging {
         }
         keep
     }
-    //经过上面步骤过滤，剩下的号码对应该是 AN-WM MN-AN MN-WN MN-MN
+    //经过上面步骤过滤，剩下的号码对应该是 AN-WN MN-AN MN-WN MN-MN
     
     val UPTNRDD = keepNodeRDD.map{
       (v) => 
         val row = Bytes.toString(v._2.getRow).substring(2)
         val ty = Bytes.toString(v._2.getRow).substring(2,4)
-        if(ty.equals("AN")||ty.equals("WM")||ty.equals("MN")){
+        if(ty.equals("AN")||ty.equals("WN")||ty.equals("MN")){
           val qualifiers = v._2.rawCells()
           var value = ""
           for(q <- qualifiers){
@@ -157,7 +165,12 @@ object GenerateRealPairs extends Logging {
 						case _    =>  
     				}
           }
-        	(v._1,(row,value.substring(1)))
+        	if(value.length()>1){
+        		(v._1,(row,value.substring(1))) 
+        	}else{
+        	  info("======this UPTN has no connect with ID-CI-QQ-WC-IS-UD======")
+        	  (v._1,(row,value))
+        	}
         }else{
           (0L,("",""))
         }

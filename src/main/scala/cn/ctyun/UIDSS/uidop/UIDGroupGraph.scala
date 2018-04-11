@@ -162,12 +162,14 @@ class UIDGroupGraph(group: List[(String, String)]) {
         lstbufUIDs += ((an, uidAN))
       }
     }
+    //以上步骤为了找到ans(此ans只会有孤立号码，和成对号码，如：AN123   WN123;MN123)中的每个号码的原有UID邻接点，output：list((WM123,""),(MN123,UD123))
     var lstGroupUID: List[(String, String)] = lstbufUIDs.toList
 
     //算出每个UID的加权值
     var uidCounts = Map[String, Int]()
     for (vertex <- lstGroupUID) {
       //没有UID的节点(是为了以后补上UID加的)不参加优势UID
+      //有UID邻接点的号码才会走这段，原来没有UID邻接点的不走这段
       if (vertex._2.length() > 0) {
         var count = uidCounts.getOrElse(vertex._2, 0)
         //与不同类型节点相连的UID权重是不同的
@@ -183,6 +185,7 @@ class UIDGroupGraph(group: List[(String, String)]) {
     }
 
     //出现次数最多的UID被选为有效UID
+    //实际上权值最大的为有效UID
     var maxcount = 0
     var maxUid = ""
     uidCounts.foreach {
@@ -208,6 +211,7 @@ class UIDGroupGraph(group: List[(String, String)]) {
     lstGroupUID = lstGroupUID.map { vertex =>
       {
         //宽带有多个UID, 只增不删,不能覆盖
+        //如果MN原先有UD则用原来的UID，如果WN原来也有UID则用优势的UID，如果两个都没有则不变，还是((WN123,""),(MN123,""))
         if (vertex._2.length() > 0) {
           var count = uidCounts.getOrElse(vertex._2, 0)
           val typ = vertex._1.substring(0, 2)
@@ -220,7 +224,8 @@ class UIDGroupGraph(group: List[(String, String)]) {
         }
       }
     }
-
+    //如果两个号码都没有UID则会新生成一个UID为maxUid
+    //孤立节点也会生成一个新的UID为maxUid
     (maxUid, lstGroupUID)
   }
 
